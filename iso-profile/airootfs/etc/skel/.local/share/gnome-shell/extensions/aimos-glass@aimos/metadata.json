@@ -1,0 +1,7 @@
+{
+  "name": "AI_M_OS Glassmorphism",
+  "description": "Glassmorphism panel for AI_M_OS",
+  "uuid": "aimos-glass@aimos",
+  "shell-version": ["50"],
+  "version": 1
+}

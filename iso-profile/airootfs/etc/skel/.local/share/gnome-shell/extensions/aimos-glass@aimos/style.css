@@ -1,0 +1,13 @@
+#panel {
+    background-color: rgba(13,13,43,0.45) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4) !important;
+}
+#panel .panel-button { color: rgba(255,255,255,0.92) !important; border-radius: 8px; }
+#panel .panel-button:hover { background-color: rgba(255,255,255,0.10) !important; }
+#panel .clock-display .clock { color: rgba(255,255,255,0.95) !important; font-weight: 600 !important; }
+.notification-banner { background-color: rgba(13,13,43,0.82) !important; border: 1px solid rgba(255,255,255,0.12) !important; border-radius: 14px !important; color: white !important; }
+#dash { background-color: rgba(13,13,43,0.55) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 20px !important; }
+.popup-menu-boxpointer { background-color: rgba(13,13,43,0.85) !important; border: 1px solid rgba(255,255,255,0.10) !important; border-radius: 14px !important; }
+.popup-menu-item { color: rgba(255,255,255,0.9) !important; border-radius: 8px !important; }
+.popup-menu-item:hover { background-color: rgba(255,255,255,0.10) !important; }

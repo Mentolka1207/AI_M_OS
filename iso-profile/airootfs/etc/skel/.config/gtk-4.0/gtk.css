@@ -1,0 +1,4 @@
+window { background-color: alpha(#0d0d2b, 0.7); }
+headerbar { background: alpha(#1a1a3e, 0.6); border-bottom: 1px solid alpha(white,0.1); }
+button { background: alpha(white,0.08); border: 1px solid alpha(white,0.15); border-radius: 8px; }
+button:hover { background: alpha(white,0.15); }

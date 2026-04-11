@@ -1,0 +1,22 @@
+# Build outputs
+out/
+build/
+*.iso
+*.tar.gz
+
+# Work directories
+aimos-work/
+/tmp/
+
+# Go
+go-daemons/build/
+*.exe
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
