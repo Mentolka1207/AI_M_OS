@@ -1,0 +1,16 @@
+[Unit]
+Description=AI_M_OS AI Scheduler Daemon
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+Environment=AIMOS_NO_DB=1
+Environment=AIMOS_INTERVAL=1
+WorkingDirectory=/opt/aimos/ai-daemon
+ExecStart=/usr/bin/python /opt/aimos/ai-daemon/daemon.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

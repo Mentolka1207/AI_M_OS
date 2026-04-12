@@ -143,4 +143,8 @@ jdk-openjdk
 postgresql
 fastfetch
 python-psycopg2
-postgresql
+gnome-shell-extensions
+xorg-server
+mesa
+xf86-video-vmware
+open-vm-tools

@@ -4,7 +4,7 @@
 iso_name="AI_M_OS"
 iso_label="AIMOS_ALPHA"
 iso_publisher="AI_M_OS Project"
-iso_application="AI_M_OS Alpha 0.1.0"
+iso_application="AI_M_OS Alpha 0.3.0"
 iso_version="$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y.%m.%d)"
 install_dir="arch"
 buildmodes=('iso')
@@ -26,4 +26,9 @@ file_permissions=(
   ["/usr/local/bin/sensor-daemon"]="0:0:755"
   ["/usr/local/bin/Installation_guide"]="0:0:755"
   ["/usr/local/bin/livecd-sound"]="0:0:755"
+)
+
+# AI-daemon
+file_permissions+=(
+  ["/opt/aimos/ai-daemon/daemon.py"]="0:0:755"
 )

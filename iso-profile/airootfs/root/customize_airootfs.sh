@@ -1,118 +1,46 @@
 #!/usr/bin/env bash
-set -euo pipefail
-echo "[AI_M_OS] airootfs.sh START"
+set -e
 
-# Locale
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+# ── Locale ────────────────────────────────────────────────────────────────────
+sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
 locale-gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
-# Hostname
-echo "AI_M_OS" > /etc/hostname
-cat > /etc/hosts << 'HOSTS'
-127.0.0.1   localhost
-::1         localhost
-127.0.1.1   AI_M_OS.localdomain AI_M_OS
-HOSTS
+# ── Enable systemd services ───────────────────────────────────────────────────
+systemctl enable gdm
+systemctl enable NetworkManager
+systemctl enable sshd
+systemctl enable aimos-network-daemon
+systemctl enable aimos-power-daemon
+systemctl enable aimos-sensor-daemon
+systemctl enable aimos-ai-daemon
 
-# OS identity
-cat > /etc/os-release << 'OSREL'
-NAME="AI_M_OS"
-PRETTY_NAME="AI_M_OS Alpha 0.1.0"
-ID=aimos
-ID_LIKE=arch
-BUILD_ID=0.1.0
-ANSI_COLOR="1;34"
-HOME_URL="https://github.com/aimos"
-OSREL
+# ── Create /run/aimos at boot ─────────────────────────────────────────────────
+mkdir -p /run/aimos
 
-# Timezone
-ln -sf /usr/share/zoneinfo/Europe/Kiev /etc/localtime
+# ── GNOME: disable initial setup ──────────────────────────────────────────────
+ln -sf /dev/null /etc/systemd/system/gnome-initial-setup.service 2>/dev/null || true
 
-# Пользователь
-useradd -m -G wheel,video,audio,storage -s /bin/bash aimos 2>/dev/null || true
-echo "aimos:aimos" | chpasswd
-echo "root:aimos" | chpasswd
-echo "aimos ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/aimos
-chmod 440 /etc/sudoers.d/aimos
-
-# Сервисы
-systemctl enable gdm.service
-
-# GDM автологин + Xorg
+# ── Auto-login as root in GDM ─────────────────────────────────────────────────
 mkdir -p /etc/gdm
-cat > /etc/gdm/custom.conf << 'GDM'
+cat > /etc/gdm/custom.conf << 'GDMEOF'
 [daemon]
 AutomaticLoginEnable=True
-AutomaticLogin=aimos
-WaylandEnable=false
-GDM
+AutomaticLogin=root
+GDMEOF
 
-# GNOME настройки для нового пользователя
-mkdir -p /etc/dconf/db/local.d /etc/dconf/profile
-cat > /etc/dconf/profile/user << 'DCONF'
-user-db:user
-system-db:local
-DCONF
-cat > /etc/dconf/db/local.d/00-aimos << 'DCONF'
-[org/gnome/desktop/interface]
-color-scheme='prefer-dark'
-font-name='Noto Sans 11'
-monospace-font-name='JetBrains Mono 11'
-enable-animations=true
-
-[org/gnome/desktop/background]
-primary-color='#0d0d2b'
-secondary-color='#1a1a3e'
-color-shading-type='vertical'
-picture-options='none'
-
-[org/gnome/shell]
+# ── GNOME Shell extensions: enable aimos-glass ────────────────────────────────
+mkdir -p /root/.config
+cat > /root/.config/gnome-shell-extensions.conf << 'EXTEOF'
+[org.gnome.shell]
 enabled-extensions=['aimos-glass@aimos']
-disable-user-extensions=false
-DCONF
-dconf update 2>/dev/null || true
+EXTEOF
 
-# MOTD
-echo "AI_M_OS Alpha 0.1.0" > /etc/motd
-echo "AI_M_OS Alpha 0.1.0" > /etc/issue
+# ── PostgreSQL: init DB for metrics ───────────────────────────────────────────
+# (runs only if postgresql is available and not NO_DB mode)
+if command -v initdb &>/dev/null; then
+    mkdir -p /var/lib/postgres/data
+    chown postgres:postgres /var/lib/postgres/data
+    su -c "initdb -D /var/lib/postgres/data --locale=en_US.UTF-8" postgres || true
+fi
 
-# AI Daemon
-mkdir -p /usr/local/lib/aimos
-cat > /usr/local/lib/aimos/ai_daemon.py << 'PY'
-#!/usr/bin/env python3
-import time, logging
-logging.basicConfig(level=logging.INFO, format='[AI_M_OS] %(asctime)s: %(message)s')
-def main():
-    logging.info("AI Daemon Alpha v0.1.0 started")
-    while True:
-        with open('/proc/loadavg') as f:
-            load = f.read().strip().split()[0]
-        logging.info(f"load={load}")
-        time.sleep(5)
-if __name__ == '__main__':
-    main()
-PY
-chmod +x /usr/local/lib/aimos/ai_daemon.py
-
-cat > /etc/systemd/system/aimos-ai-daemon.service << 'SVC'
-[Unit]
-Description=AI_M_OS AI Daemon Alpha
-After=network.target
-[Service]
-Type=simple
-ExecStart=/usr/bin/python3 /usr/local/lib/aimos/ai_daemon.py
-Restart=on-failure
-[Install]
-WantedBy=multi-user.target
-SVC
-systemctl enable aimos-ai-daemon.service
-
-echo "[AI_M_OS] airootfs.sh DONE"
-systemctl enable aimos-power-daemon.service
-systemctl enable aimos-network-daemon.service
-systemctl enable aimos-sensor-daemon.service
-systemctl enable aimos-power-daemon.service
-systemctl enable aimos-network-daemon.service
-systemctl enable aimos-sensor-daemon.service
-systemctl enable dhcpcd.service
+echo "AI_M_OS customize_airootfs.sh complete"
