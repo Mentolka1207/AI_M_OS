@@ -142,3 +142,5 @@ dotnet-sdk
 jdk-openjdk
 postgresql
 fastfetch
+python-psycopg2
+postgresql
