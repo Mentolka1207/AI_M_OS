@@ -4,7 +4,7 @@ public record NetSnapshot(string Iface, long RxBytes, long TxBytes, DateTime Tim
 public record DiskSnapshot(string Device, long SectorsRead, long SectorsWritten, DateTime Time);
 public record IoRate(double ReadBytesPerSec, double WriteBytesPerSec);
 
-public static class SystemMetrics
+public static partial class SystemMetrics
 {
     private const string ProcNetDev    = "/proc/net/dev";
     private const string ProcDiskStats = "/proc/diskstats";
@@ -83,4 +83,100 @@ public static class SystemMetrics
     // Нормализует значение в диапазон 0..1 для LevelBar
     public static double Normalize(double value, double max)
         => max <= 0 ? 0 : Math.Min(value / max, 1.0);
+}
+
+// ─── CPU ──────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Raw /proc/stat snapshot: total + per-core (user, nice, system, idle, iowait, irq, softirq).
+/// Source: https://www.kernel.org/doc/html/latest/filesystems/proc.html#id10
+/// </summary>
+public record CpuSnapshot(long[] TotalTicks, long[] IdleTicks);
+
+public static partial class SystemMetrics
+{
+    private const string ProcStat    = "/proc/stat";
+    private const string ProcMemInfo = "/proc/meminfo";
+
+    public static CpuSnapshot ReadCpuSnapshot()
+    {
+        var totalList = new List<long>();
+        var idleList  = new List<long>();
+
+        foreach (var line in File.ReadLines(ProcStat))
+        {
+            if (!line.StartsWith("cpu")) break;
+            var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length < 5) continue;
+
+            long user    = long.Parse(parts[1]);
+            long nice    = long.Parse(parts[2]);
+            long system  = long.Parse(parts[3]);
+            long idle    = long.Parse(parts[4]);
+            long iowait  = parts.Length > 5 ? long.Parse(parts[5]) : 0;
+            long irq     = parts.Length > 6 ? long.Parse(parts[6]) : 0;
+            long softirq = parts.Length > 7 ? long.Parse(parts[7]) : 0;
+
+            long total = user + nice + system + idle + iowait + irq + softirq;
+            totalList.Add(total);
+            idleList.Add(idle + iowait);
+        }
+
+        return new CpuSnapshot([..totalList], [..idleList]);
+    }
+
+    /// <summary>
+    /// Returns (totalUsagePercent, perCoreUsagePercent[]).
+    /// Index 0 = aggregate "cpu" line, index 1+ = cpu0, cpu1, ...
+    /// </summary>
+    public static (double Total, double[] Cores) ComputeCpuUsage(
+        CpuSnapshot prev, CpuSnapshot curr)
+    {
+        int count = Math.Min(prev.TotalTicks.Length, curr.TotalTicks.Length);
+        var cores = new double[Math.Max(0, count - 1)];
+
+        double totalUsage = 0;
+        for (int i = 0; i < count; i++)
+        {
+            long dTotal = curr.TotalTicks[i] - prev.TotalTicks[i];
+            long dIdle  = curr.IdleTicks[i]  - prev.IdleTicks[i];
+            double usage = dTotal > 0 ? (1.0 - (double)dIdle / dTotal) * 100.0 : 0;
+            if (i == 0) totalUsage = usage;
+            else        cores[i - 1] = usage;
+        }
+
+        return (totalUsage, cores);
+    }
+
+    // ─── Memory ───────────────────────────────────────────────────────────────
+
+    public record MemInfo(long TotalKb, long UsedKb, long SwapTotalKb, long SwapUsedKb);
+
+    /// <summary>
+    /// Parses /proc/meminfo.
+    /// UsedKb = MemTotal - MemAvailable (matches htop's definition).
+    /// Source: https://www.kernel.org/doc/html/latest/filesystems/proc.html#meminfo
+    /// </summary>
+    public static MemInfo ReadMemInfo()
+    {
+        long total = 0, available = 0, swapTotal = 0, swapFree = 0;
+
+        foreach (var line in File.ReadLines(ProcMemInfo))
+        {
+            var s = line.Split(':', StringSplitOptions.TrimEntries);
+            if (s.Length < 2) continue;
+            long kb = long.TryParse(
+                s[1].Replace("kB", "").Trim(), out var v) ? v : 0;
+
+            switch (s[0])
+            {
+                case "MemTotal":     total     = kb; break;
+                case "MemAvailable": available = kb; break;
+                case "SwapTotal":    swapTotal = kb; break;
+                case "SwapFree":     swapFree  = kb; break;
+            }
+        }
+
+        return new MemInfo(total, total - available, swapTotal, swapTotal - swapFree);
+    }
 }

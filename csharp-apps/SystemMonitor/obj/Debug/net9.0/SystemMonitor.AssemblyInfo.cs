@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ai-m-os-sysmon")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+421b464b5a112489b38c949bc08721513ef97a0f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd72b826da7ab14f8b1759ca4c7c0398d25072f6")]
 [assembly: System.Reflection.AssemblyProductAttribute("ai-m-os-sysmon")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ai-m-os-sysmon")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

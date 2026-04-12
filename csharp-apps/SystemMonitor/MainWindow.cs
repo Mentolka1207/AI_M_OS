@@ -9,7 +9,7 @@ public class MainWindow : Adw.ApplicationWindow
     {
         Application  = app;
         Title        = "AI_M_OS System Monitor";
-        DefaultWidth = 440; DefaultHeight = 700;
+        DefaultWidth = 440; DefaultHeight = 800;
         AddCssClass("aimos-monitor");
         LoadCss();
 
@@ -23,6 +23,8 @@ public class MainWindow : Adw.ApplicationWindow
 
         var content = Box.New(Orientation.Vertical, 16);
         content.AddCssClass("content-box");
+        content.Append(new CpuWidget().Root);
+        content.Append(new RamWidget().Root);
         content.Append(new NetworkWidget().Root);
         content.Append(new DiskWidget().Root);
         scroll.Child = content;
