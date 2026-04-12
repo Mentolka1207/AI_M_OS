@@ -48,7 +48,7 @@ AI_M_OS/
 
 ```bash
 # Клонировать
-git clone https://github.com/YOUR_USERNAME/AI_M_OS.git
+git clone https://github.com/Mentolka1207/AI_M_OS.git
 cd AI_M_OS
 
 # Собрать Go-демоны
