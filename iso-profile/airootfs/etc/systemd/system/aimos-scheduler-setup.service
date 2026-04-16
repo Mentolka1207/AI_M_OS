@@ -1,0 +1,12 @@
+[Unit]
+Description=AI_M_OS Scheduler Kernel Module Setup
+DefaultDependencies=no
+Before=sysinit.target modules-load.service
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/depmod -a
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target
