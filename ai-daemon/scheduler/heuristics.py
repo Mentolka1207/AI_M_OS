@@ -1,3 +1,4 @@
+from scheduler.kernel_iface import renice_via_kernel as renice
 """
 AI_M_OS Simple scheduler heuristics.
 
@@ -66,6 +67,7 @@ def _read_proc(pid: int) -> ProcessInfo:
     return ProcessInfo(pid, name, uid, utime + stime, nice_val, vm_rss)
 
 
+# renice() moved to kernel_iface.py
 def renice(pid: int, new_nice: int) -> bool:
     """Выставить nice через os.setpriority. Требует root."""
     try:
