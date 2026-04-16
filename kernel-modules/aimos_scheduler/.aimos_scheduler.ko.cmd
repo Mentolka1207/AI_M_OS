@@ -1,0 +1,1 @@
+savedcmd_aimos_scheduler.ko := ld -r -m elf_x86_64 -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T /usr/lib/modules/6.19.11-arch1-1/build/scripts/module.lds -o aimos_scheduler.ko aimos_scheduler.o aimos_scheduler.mod.o .module-common.o
