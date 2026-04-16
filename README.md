@@ -69,7 +69,7 @@ sudo mkarchiso -v -w /tmp/aimos-work -o ./out iso-profile/
 | Alpha 0.1.0 | ✅ Готово | Base ISO, GNOME 50, Go-демоны, AI-daemon |
 | Alpha 0.2.0 | ✅ Готово | C# GUI приложения, glassmorphism
 | Alpha 0.3.0 | ✅ Готово | AI-daemon, PostgreSQL, scheduler heuristics | C# GUI приложения, glassmorphism улучшения |
-| Beta 0.5.0 | ⏳ | AI-планировщик C++ kernel module |
+| Beta 0.5.0 | 🔄 В разработке | AI-планировщик kernel module (C), GNOME Software, kernel_iface |
 | RC 0.9.0 | ⏳ | Реальное железо, ARM64 |
 | Release 1.0 | ⏳ 2030 | Стабильный релиз |
 
