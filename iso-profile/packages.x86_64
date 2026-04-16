@@ -148,3 +148,6 @@ xorg-server
 mesa
 xf86-video-vmware
 open-vm-tools
+gnome-software
+packagekit
+gnome-software-packagekit-plugin
