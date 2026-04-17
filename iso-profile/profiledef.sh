@@ -2,9 +2,9 @@
 # shellcheck disable=SC2034
 
 iso_name="AI_M_OS"
-iso_label="AIMOS_ALPHA"
+iso_label="AIMOS_BETA"
 iso_publisher="AI_M_OS Project"
-iso_application="AI_M_OS Alpha 0.3.0"
+iso_application="AI_M_OS Beta 0.5.0"
 iso_version="$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y.%m.%d)"
 install_dir="arch"
 buildmodes=('iso')
@@ -12,7 +12,7 @@ bootmodes=('bios.syslinux'
            'uefi.systemd-boot')
 pacman_conf="pacman.conf"
 airootfs_image_type="squashfs"
-airootfs_image_tool_options=('-comp' 'xz' '-Xbcj' 'x86' '-b' '1M' '-Xdict-size' '1M')
+airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '3')
 bootstrap_tarball_compression=('zstd' '-c' '-T0' '--auto-threads=logical' '--long' '-19')
 file_permissions=(
   ["/etc/shadow"]="0:0:400"
