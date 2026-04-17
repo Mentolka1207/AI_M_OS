@@ -2,7 +2,7 @@
 
 **AI_M_OS** — кастомная операционная система на базе Arch Linux с встроенным AI на уровне ядра.
 
-![Alpha](https://img.shields.io/badge/version-Alpha%200.3.0-blue)
+![Alpha](https://img.shields.io/badge/version-Beta%200.5.0-orange)
 ![Arch](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
 ![GNOME](https://img.shields.io/badge/DE-GNOME%2050-4a86cf)
 ![License](https://img.shields.io/badge/license-MIT-green)
