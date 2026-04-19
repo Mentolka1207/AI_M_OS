@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=AI_M_OS Scheduler
+GenericName=Process Priority Manager
+Comment=Manage process priorities via aimos_scheduler kernel module
+Exec=/usr/bin/python3 /home/aimos/AI_M_OS/ai-daemon/dbus/aimos_scheduler_app.py
+Icon=org.aimos.SchedulerApp
+Terminal=false
+Type=Application
+Categories=System;Settings;
+Keywords=scheduler;priority;nice;process;aimos;
+StartupNotify=true
+X-GNOME-UsesNotifications=true

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.aimos.SchedulerApp</id>
+  <name>AI_M_OS Scheduler</name>
+  <summary>Manage process priorities via kernel module</summary>
+  <description>
+    <p>AI_M_OS Scheduler allows managing process nice values through
+    the aimos_scheduler kernel module via D-Bus interface.</p>
+  </description>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <launchable type="desktop-id">org.aimos.SchedulerApp.desktop</launchable>
+  <releases>
+    <release version="0.5.0" date="2026-04-18"/>
+  </releases>
+  <developer_name>AI_M_OS Project</developer_name>
+</component>
