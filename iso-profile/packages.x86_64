@@ -162,3 +162,5 @@ pipewire
 pipewire-pulse
 pipewire-alsa
 wireplumber
+dialog
+libnewt

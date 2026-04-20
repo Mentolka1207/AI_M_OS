@@ -1,5 +1,255 @@
-#!/bin/sh
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
+#!/bin/bash
+# AI_M_OS Installer v0.9.0
+# TUI установщик на базе dialog
 
-exec xdg-open 'https://wiki.archlinux.org/title/Installation_guide'
+set -e
+
+TITLE="AI_M_OS Beta 0.5.0 Installer"
+LOG="/tmp/aimos-install.log"
+MOUNT="/mnt"
+
+log() { echo "[$(date +%T)] $*" >> "$LOG"; }
+
+die() {
+    dialog --title "Ошибка" --msgbox "$1" 8 50
+    clear
+    exit 1
+}
+
+check_root() {
+    if [[ $EUID -ne 0 ]]; then
+        die "Установщик должен запускаться от root."
+    fi
+}
+
+welcome() {
+    dialog --title "$TITLE" --msgbox \
+"Добро пожаловать в установщик AI_M_OS!
+
+Будет установлено:
+  • Arch Linux base
+  • GNOME 50 + Glassmorphism
+  • AI-планировщик (kernel module)
+  • Go-демоны (power, network, sensor)
+  • C# System Monitor
+  • D-Bus Scheduler Service
+
+Нажмите OK для продолжения." 18 55
+}
+
+check_uefi() {
+    if [[ -d /sys/firmware/efi ]]; then
+        BOOT_MODE="uefi"
+        log "Boot mode: UEFI"
+    else
+        BOOT_MODE="bios"
+        log "Boot mode: BIOS"
+    fi
+    dialog --title "Режим загрузки" --msgbox \
+        "Обнаружен режим: ${BOOT_MODE^^}\n\nУстановка будет настроена соответственно." 8 45
+}
+
+select_disk() {
+    local disks=()
+    while IFS= read -r line; do
+        local dev size
+        dev=$(echo "$line" | awk '{print $1}')
+        size=$(echo "$line" | awk '{print $2}')
+        disks+=("/dev/$dev" "$size")
+    done < <(lsblk -dno NAME,SIZE | grep -v "^loop\|^sr\|^ram")
+
+    if [[ ${#disks[@]} -eq 0 ]]; then
+        die "Диски не найдены."
+    fi
+
+    DISK=$(dialog --title "Выбор диска" \
+        --menu "Выберите диск для установки AI_M_OS:\n(ВСЕ ДАННЫЕ БУДУТ УДАЛЕНЫ)" \
+        15 55 6 "${disks[@]}" 3>&1 1>&2 2>&3) || die "Диск не выбран."
+
+    log "Selected disk: $DISK"
+
+    dialog --title "Подтверждение" --yesno \
+"ВНИМАНИЕ!\n\nВсе данные на $DISK будут удалены!\nПродолжить?" 9 45 || die "Установка отменена."
+}
+
+get_hostname() {
+    HOSTNAME=$(dialog --title "Имя системы" \
+        --inputbox "Введите hostname для AI_M_OS:" 8 45 "aimos" \
+        3>&1 1>&2 2>&3) || die "Hostname не введён."
+    log "Hostname: $HOSTNAME"
+}
+
+get_user() {
+    USERNAME=$(dialog --title "Пользователь" \
+        --inputbox "Введите имя пользователя:" 8 45 "aimos" \
+        3>&1 1>&2 2>&3) || die "Имя не введено."
+
+    PASSWORD=$(dialog --title "Пароль" \
+        --passwordbox "Введите пароль для $USERNAME:" 8 45 \
+        3>&1 1>&2 2>&3) || die "Пароль не введён."
+
+    log "User: $USERNAME"
+}
+
+get_timezone() {
+    TIMEZONE=$(dialog --title "Часовой пояс" \
+        --menu "Выберите регион:" 15 50 5 \
+        "Europe/Moscow"    "Москва (UTC+3)" \
+        "Europe/Kiev"      "Киев (UTC+2/3)" \
+        "Europe/Berlin"    "Берлин (UTC+1/2)" \
+        "America/New_York" "Нью-Йорк (UTC-5/4)" \
+        "UTC"              "UTC" \
+        3>&1 1>&2 2>&3) || TIMEZONE="UTC"
+    log "Timezone: $TIMEZONE"
+}
+
+partition_disk() {
+    dialog --title "Разметка" --infobox "Разметка диска $DISK..." 4 40
+    log "Partitioning $DISK"
+
+    wipefs -a "$DISK" >> "$LOG" 2>&1
+
+    if [[ "$BOOT_MODE" == "uefi" ]]; then
+        parted -s "$DISK" \
+            mklabel gpt \
+            mkpart ESP fat32 1MiB 513MiB \
+            set 1 esp on \
+            mkpart root ext4 513MiB 100% >> "$LOG" 2>&1
+        BOOT_PART="${DISK}1"
+        ROOT_PART="${DISK}2"
+    else
+        parted -s "$DISK" \
+            mklabel msdos \
+            mkpart primary ext4 1MiB 100% \
+            set 1 boot on >> "$LOG" 2>&1
+        ROOT_PART="${DISK}1"
+        BOOT_PART=""
+    fi
+    log "Partitions: boot=$BOOT_PART root=$ROOT_PART"
+}
+
+format_mount() {
+    dialog --title "Форматирование" --infobox "Форматирование разделов..." 4 45
+
+    mkfs.ext4 -F "$ROOT_PART" >> "$LOG" 2>&1
+    mount "$ROOT_PART" "$MOUNT" >> "$LOG" 2>&1
+
+    if [[ "$BOOT_MODE" == "uefi" ]]; then
+        mkfs.fat -F32 "$BOOT_PART" >> "$LOG" 2>&1
+        mkdir -p "$MOUNT/boot/efi"
+        mount "$BOOT_PART" "$MOUNT/boot/efi" >> "$LOG" 2>&1
+    fi
+
+    log "Formatted and mounted"
+}
+
+install_base() {
+    dialog --title "Установка" --infobox \
+        "Установка базовой системы...\nЭто займёт несколько минут." 5 50
+
+    pacstrap -K "$MOUNT" base linux linux-firmware \
+        base-devel grub efibootmgr networkmanager \
+        sudo nano python go dotnet-sdk \
+        gnome gnome-shell gdm \
+        >> "$LOG" 2>&1 || die "Ошибка pacstrap. См. $LOG"
+
+    log "Base installed"
+}
+
+configure_system() {
+    dialog --title "Настройка" --infobox "Настройка системы..." 4 40
+
+    genfstab -U "$MOUNT" >> "$MOUNT/etc/fstab"
+
+    arch-chroot "$MOUNT" /bin/bash << CHROOT
+ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+hwclock --systohc
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+echo "ru_RU.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+echo "$HOSTNAME" > /etc/hostname
+useradd -m -G wheel -s /bin/bash "$USERNAME"
+echo "$USERNAME:$PASSWORD" | chpasswd
+echo "%wheel ALL=(ALL:ALL) ALL" >> /etc/sudoers
+systemctl enable gdm NetworkManager
+CHROOT
+
+    log "System configured"
+}
+
+install_bootloader() {
+    dialog --title "Загрузчик" --infobox "Установка GRUB..." 4 40
+
+    if [[ "$BOOT_MODE" == "uefi" ]]; then
+        arch-chroot "$MOUNT" grub-install \
+            --target=x86_64-efi \
+            --efi-directory=/boot/efi \
+            --bootloader-id=AI_M_OS >> "$LOG" 2>&1
+    else
+        arch-chroot "$MOUNT" grub-install "$DISK" >> "$LOG" 2>&1
+    fi
+
+    arch-chroot "$MOUNT" grub-mkconfig -o /boot/grub/grub.cfg >> "$LOG" 2>&1
+    log "Bootloader installed"
+}
+
+install_aimos_components() {
+    dialog --title "AI_M_OS" --infobox \
+        "Установка компонентов AI_M_OS...\n  • kernel module\n  • D-Bus сервис\n  • SystemMonitor" 7 50
+
+    # Скопировать ai-daemon если есть на live
+    if [[ -d /opt/aimos ]]; then
+        cp -r /opt/aimos "$MOUNT/opt/"
+        log "ai-daemon copied"
+    fi
+
+    # D-Bus policy
+    if [[ -f /usr/share/dbus-1/system.d/org.aimos.Scheduler.conf ]]; then
+        cp /usr/share/dbus-1/system.d/org.aimos.Scheduler.conf \
+           "$MOUNT/usr/share/dbus-1/system.d/"
+        log "D-Bus policy copied"
+    fi
+
+    # systemd unit
+    if [[ -f /etc/systemd/system/aimos-scheduler-dbus.service ]]; then
+        cp /etc/systemd/system/aimos-scheduler-dbus.service \
+           "$MOUNT/etc/systemd/system/"
+        arch-chroot "$MOUNT" systemctl enable aimos-scheduler-dbus
+        log "systemd unit enabled"
+    fi
+}
+
+finish() {
+    dialog --title "Готово!" --msgbox \
+"AI_M_OS успешно установлен!
+
+  Диск:      $DISK
+  Hostname:  $HOSTNAME
+  User:      $USERNAME
+  Timezone:  $TIMEZONE
+  Boot:      ${BOOT_MODE^^}
+
+Лог установки: $LOG
+
+Извлеките установочный носитель и перезагрузитесь." 16 52
+
+    clear
+    echo "Установка завершена. Перезагрузите систему."
+}
+
+# --- Main ---
+check_root
+welcome
+check_uefi
+select_disk
+get_hostname
+get_user
+get_timezone
+partition_disk
+format_mount
+install_base
+configure_system
+install_bootloader
+install_aimos_components
+finish
