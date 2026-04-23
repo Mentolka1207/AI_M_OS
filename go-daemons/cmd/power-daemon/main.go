@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"strconv"
@@ -17,6 +18,7 @@ import (
 const (
 	VERSION    = "0.1.0"
 	SOCKET_PATH = "/run/aimos/power.sock"
+	SOCKET_UNIX = "/run/aimos/power-daemon.sock"
 )
 
 type PowerState struct {
@@ -139,9 +141,34 @@ func writeState(state PowerState) {
 	os.WriteFile("/run/aimos/power-state.json", data, 0644)
 }
 
+
+func handleConn(conn net.Conn) {
+	defer conn.Close()
+	state := collectState()
+	json.NewEncoder(conn).Encode(state)
+}
+
 func main() {
 	log.SetPrefix("[AI_M_OS power-daemon] ")
 	log.Printf("Starting v%s", VERSION)
+
+	os.MkdirAll("/run/aimos", 0755)
+	os.Remove(SOCKET_UNIX)
+	ln, err := net.Listen("unix", SOCKET_UNIX)
+	if err != nil {
+		log.Fatalf("listen: %v", err)
+	}
+	defer ln.Close()
+	log.Printf("power-daemon listening on %s", SOCKET_UNIX)
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			go handleConn(conn)
+		}
+	}()
 
 	// Установи производительный governor по умолчанию
 	if err := setCPUGovernor("schedutil"); err != nil {

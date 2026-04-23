@@ -3,8 +3,14 @@ using AI_M_OS.SystemMonitor.Widgets;
 
 namespace AI_M_OS.SystemMonitor;
 
-public class MainWindow : Adw.ApplicationWindow
+public class MainWindow : Adw.ApplicationWindow, IDisposable
 {
+    private readonly CpuWidget     _cpuWidget;
+    private readonly RamWidget     _ramWidget;
+    private readonly NetworkWidget _networkWidget;
+    private readonly DiskWidget    _diskWidget;
+    private bool _disposed;
+
     public MainWindow(Adw.Application app) : base()
     {
         Application  = app;
@@ -12,27 +18,37 @@ public class MainWindow : Adw.ApplicationWindow
         DefaultWidth = 440; DefaultHeight = 800;
         AddCssClass("aimos-monitor");
         LoadCss();
-
         var header = Adw.HeaderBar.New();
         header.AddCssClass("glass-header");
         header.TitleWidget = Label.New("System Monitor");
-
         var scroll = ScrolledWindow.New();
         scroll.Vexpand = true;
         scroll.HscrollbarPolicy = PolicyType.Never;
-
+        _cpuWidget     = new CpuWidget();
+        _ramWidget     = new RamWidget();
+        _networkWidget = new NetworkWidget();
+        _diskWidget    = new DiskWidget();
         var content = Box.New(Orientation.Vertical, 16);
         content.AddCssClass("content-box");
-        content.Append(new CpuWidget().Root);
-        content.Append(new RamWidget().Root);
-        content.Append(new NetworkWidget().Root);
-        content.Append(new DiskWidget().Root);
+        content.Append(_cpuWidget.Root);
+        content.Append(_ramWidget.Root);
+        content.Append(_networkWidget.Root);
+        content.Append(_diskWidget.Root);
         scroll.Child = content;
-
         var root = Box.New(Orientation.Vertical, 0);
         root.Append(header);
         root.Append(scroll);
-        Content = root;
+        Content = root;        OnCloseRequest += (_, _) => { Dispose(); return false; };
+    }
+
+    public new void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        _cpuWidget.Dispose();
+        _ramWidget.Dispose();
+        _networkWidget.Dispose();
+        _diskWidget.Dispose();
     }
 
     private static void LoadCss()
@@ -50,10 +66,8 @@ public class MainWindow : Adw.ApplicationWindow
                 ".rate-rx{color:#33d9e0;font-size:12px;min-width:110px}" +
                 ".rate-tx{color:#ff8c35;font-size:12px;min-width:110px}" +
                 ".content-box{padding:20px 16px}");
-
         Gtk.StyleContext.AddProviderForDisplay(
             Gdk.Display.GetDefault()!,
-            provider,
-            Gtk.Constants.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            provider,            Gtk.Constants.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
 }

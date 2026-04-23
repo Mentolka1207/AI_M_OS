@@ -3,23 +3,23 @@ using AI_M_OS.SystemMonitor.Services;
 
 namespace AI_M_OS.SystemMonitor.Widgets;
 
-public class RamWidget
+public class RamWidget : IDisposable
 {
     private const uint PollMs = 2000;
-
     private readonly Box      _container;
     private readonly Label    _ramLabel;
     private readonly LevelBar _ramBar;
     private readonly Label    _swapLabel;
     private readonly LevelBar _swapBar;
+    private uint _timerId;
+    private bool _disposed;
 
     public Widget Root => _container;
 
     public RamWidget()
     {
         _container = Box.New(Orientation.Vertical, 8);
-
-        var title = Label.New("⬡  MEMORY");
+        var title = Label.New("o  MEMORY");
         title.AddCssClass("section-title");
         title.Halign = Align.Start;
         _container.Append(title);
@@ -27,7 +27,6 @@ public class RamWidget
         var card = Box.New(Orientation.Vertical, 6);
         card.AddCssClass("glass-card");
 
-        // RAM row
         var ramRow = Box.New(Orientation.Horizontal, 8);
         _ramLabel = Label.New("RAM: 0 MB / 0 MB");
         _ramLabel.AddCssClass("iface-name");
@@ -39,7 +38,6 @@ public class RamWidget
         ramRow.Append(_ramBar);
         card.Append(ramRow);
 
-        // Swap row
         var swapRow = Box.New(Orientation.Horizontal, 8);
         _swapLabel = Label.New("Swap: 0 MB / 0 MB");
         _swapLabel.AddCssClass("rate-tx");
@@ -52,24 +50,33 @@ public class RamWidget
         card.Append(swapRow);
 
         _container.Append(card);
-        GLib.Functions.TimeoutAdd(0, PollMs, Tick);
+        _timerId = GLib.Functions.TimeoutAdd(0, PollMs, Tick);
     }
 
     private bool Tick()
     {
-        var mem = SystemMetrics.ReadMemInfo();
-
-        _ramLabel.SetText(
-            $"RAM: {FormatMb(mem.UsedKb)} / {FormatMb(mem.TotalKb)}");
-        _ramBar.Value = mem.TotalKb > 0
-            ? (double)mem.UsedKb / mem.TotalKb : 0;
-
-        _swapLabel.SetText(
-            $"Swap: {FormatMb(mem.SwapUsedKb)} / {FormatMb(mem.SwapTotalKb)}");
-        _swapBar.Value = mem.SwapTotalKb > 0
-            ? (double)mem.SwapUsedKb / mem.SwapTotalKb : 0;
-
+        try
+        {
+            var mem = SystemMetrics.ReadMemInfo();
+        _ramLabel.SetText($"RAM: {FormatMb(mem.UsedKb)} / {FormatMb(mem.TotalKb)}");
+            _ramBar.Value = mem.TotalKb > 0
+                ? Math.Clamp((double)mem.UsedKb / mem.TotalKb, 0.0, 1.0) : 0;
+            _swapLabel.SetText($"Swap: {FormatMb(mem.SwapUsedKb)} / {FormatMb(mem.SwapTotalKb)}");
+            _swapBar.Value = mem.SwapTotalKb > 0
+                ? Math.Clamp((double)mem.SwapUsedKb / mem.SwapTotalKb, 0.0, 1.0) : 0;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[RamWidget] Tick error: {ex.Message}");
+        }
         return true;
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        if (_timerId != 0) { GLib.Functions.SourceRemove(_timerId); _timerId = 0; }
     }
 
     private static string FormatMb(long kb) =>

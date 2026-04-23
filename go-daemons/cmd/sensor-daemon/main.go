@@ -5,6 +5,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -15,6 +16,8 @@ import (
 )
 
 const VERSION = "0.1.0"
+
+const socketPath = "/run/aimos/sensor-daemon.sock"
 
 type SensorState struct {
 	CPUTempC    float64            `json:"cpu_temp_c"`
@@ -103,9 +106,34 @@ func collectState() SensorState {
 	}
 }
 
+
+func handleConn(conn net.Conn) {
+	defer conn.Close()
+	state := collectState()
+	json.NewEncoder(conn).Encode(state)
+}
+
 func main() {
 	log.SetPrefix("[AI_M_OS sensor-daemon] ")
 	log.Printf("Starting v%s", VERSION)
+
+	os.MkdirAll("/run/aimos", 0755)
+	os.Remove(socketPath)
+	ln, err := net.Listen("unix", socketPath)
+	if err != nil {
+		log.Fatalf("listen: %v", err)
+	}
+	defer ln.Close()
+	log.Printf("sensor-daemon listening on %s", socketPath)
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			go handleConn(conn)
+		}
+	}()
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)
