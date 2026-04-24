@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AI_M_OS AI-daemon — Alpha 0.3.0
+AI_M_OS AI-daemon — RC 0.9.0
 Сбор метрик → PostgreSQL + эвристики планировщика.
 
 Запуск:
