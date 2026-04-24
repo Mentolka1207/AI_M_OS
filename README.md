@@ -70,8 +70,8 @@ sudo mkarchiso -v -w /tmp/aimos-work -o ./out iso-profile/
 | Alpha 0.2.0 | ✅ Готово | C# GUI приложения, glassmorphism
 | Alpha 0.3.0 | ✅ Готово | AI-daemon, PostgreSQL, scheduler heuristics | C# GUI приложения, glassmorphism улучшения |
 | Beta 0.5.0 | ✅ Готово | AI-планировщик kernel module, D-Bus, Gnome интеграция |
-| RC 0.9.0 | ⏳ | Реальное железо, x86_64 |
-| Release 1.0 | ⏳ 2030 | Стабильный релиз |
+| RC 0.9.0 | ✅ Готово | Реальное железо, x86_64 |
+| Release 1.0 | ⏳ | Стабильный релиз |
 
 ## Стек технологий
 
