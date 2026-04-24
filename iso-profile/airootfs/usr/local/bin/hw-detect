@@ -1,0 +1,213 @@
+#!/bin/bash
+# AI_M_OS Hardware Detection v0.9.0
+# Проверяет совместимость железа перед установкой
+
+TITLE="AI_M_OS Hardware Check"
+PASS=0
+WARN=0
+FAIL=0
+REPORT="/tmp/aimos-hwcheck.txt"
+
+> "$REPORT"
+
+log() { echo "$*" >> "$REPORT"; }
+ok()   { echo "[OK]   $*" >> "$REPORT"; ((PASS++)); }
+warn() { echo "[WARN] $*" >> "$REPORT"; ((WARN++)); }
+fail() { echo "[FAIL] $*" >> "$REPORT"; ((FAIL++)); }
+
+check_cpu() {
+    local model cores freq
+    model=$(grep -m1 "model name" /proc/cpuinfo | cut -d: -f2 | xargs)
+    cores=$(nproc)
+    freq=$(grep -m1 "cpu MHz" /proc/cpuinfo | cut -d: -f2 | xargs | cut -d. -f1)
+
+    log "=== CPU ==="
+    log "Model: $model"
+    log "Cores: $cores"
+    log "Freq:  ${freq} MHz"
+
+    if [[ "$cores" -ge 4 ]]; then
+        ok "CPU: $cores cores ($model)"
+    elif [[ "$cores" -ge 2 ]]; then
+        warn "CPU: only $cores cores — recommended 4+"
+    else
+        fail "CPU: $cores core — minimum 2 required"
+    fi
+
+    # Check x86_64
+    if uname -m | grep -q "x86_64"; then
+        ok "CPU: x86_64 architecture"
+    else
+        fail "CPU: not x86_64 — $(uname -m) not supported"
+    fi
+
+    # Check virtualization
+    if grep -qE "vmx|svm" /proc/cpuinfo; then
+        ok "CPU: hardware virtualization supported"
+    else
+        warn "CPU: no hardware virtualization (VT-x/AMD-V)"
+    fi
+}
+
+check_ram() {
+    local total_kb total_gb
+    total_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+    total_gb=$(echo "scale=1; $total_kb / 1048576" | bc)
+
+    log ""
+    log "=== RAM ==="
+    log "Total: ${total_gb} GB"
+
+    if [[ "$total_kb" -ge 8388608 ]]; then
+        ok "RAM: ${total_gb} GB (recommended)"
+    elif [[ "$total_kb" -ge 4194304 ]]; then
+        warn "RAM: ${total_gb} GB — recommended 8 GB+"
+    elif [[ "$total_kb" -ge 2097152 ]]; then
+        warn "RAM: ${total_gb} GB — minimum for basic install"
+    else
+        fail "RAM: ${total_gb} GB — minimum 2 GB required"
+    fi
+}
+
+check_disk() {
+    log ""
+    log "=== DISKS ==="
+
+    local found=0
+    while IFS= read -r line; do
+        local dev size
+        dev=$(echo "$line" | awk '{print $1}')
+        size=$(echo "$line" | awk '{print $2}')
+        size_gb=$(echo "$line" | awk '{print $3}')
+        log "Disk: /dev/$dev — $size"
+
+        # Convert to GB for comparison
+        local size_bytes
+        size_bytes=$(lsblk -bdno SIZE /dev/$dev 2>/dev/null)
+        if [[ -n "$size_bytes" && "$size_bytes" -ge 21474836480 ]]; then
+            ok "Disk: /dev/$dev ${size} — sufficient (20GB+)"
+            ((found++))
+        elif [[ -n "$size_bytes" && "$size_bytes" -ge 10737418240 ]]; then
+            warn "Disk: /dev/$dev ${size} — minimum (10-20GB)"
+            ((found++))
+        else
+            warn "Disk: /dev/$dev ${size} — too small (<10GB)"
+        fi
+    done < <(lsblk -dno NAME,SIZE | grep -v "^loop\|^sr\|^ram\|^zram")
+
+    if [[ "$found" -eq 0 ]]; then
+        fail "No suitable disk found (20GB+ required)"
+    fi
+}
+
+check_uefi() {
+    log ""
+    log "=== BOOT MODE ==="
+    if [[ -d /sys/firmware/efi ]]; then
+        ok "Boot: UEFI mode detected"
+        log "EFI vars: $(ls /sys/firmware/efi/efivars 2>/dev/null | wc -l) variables"
+    else
+        warn "Boot: BIOS mode — UEFI recommended for full feature support"
+    fi
+}
+
+check_network() {
+    log ""
+    log "=== NETWORK ==="
+
+    local ifaces
+    ifaces=$(ip link show | grep -E "^[0-9]" | grep -v "lo:" | awk '{print $2}' | tr -d ':')
+
+    if [[ -z "$ifaces" ]]; then
+        warn "Network: no interfaces found"
+        return
+    fi
+
+    for iface in $ifaces; do
+        local state
+        state=$(cat /sys/class/net/$iface/operstate 2>/dev/null)
+        if [[ "$state" == "up" ]]; then
+            ok "Network: $iface — connected"
+        else
+            warn "Network: $iface — $state"
+        fi
+    done
+
+    # Check internet
+    if ping -c1 -W2 8.8.8.8 &>/dev/null; then
+        ok "Network: internet reachable"
+    else
+        warn "Network: no internet — installation requires network access"
+    fi
+}
+
+check_gpu() {
+    log ""
+    log "=== GPU ==="
+
+    if command -v lspci &>/dev/null; then
+        local gpu
+        gpu=$(lspci | grep -iE "vga|3d|display" | head -1)
+        if [[ -n "$gpu" ]]; then
+            ok "GPU: $gpu"
+            # Check for known supported GPUs
+            if echo "$gpu" | grep -qi "nvidia"; then
+                warn "GPU: NVIDIA — proprietary drivers may be needed"
+            elif echo "$gpu" | grep -qi "amd\|radeon"; then
+                ok "GPU: AMD — open source drivers (amdgpu) supported"
+            elif echo "$gpu" | grep -qi "intel"; then
+                ok "GPU: Intel — open source drivers supported"
+            elif echo "$gpu" | grep -qi "vmware\|virtualbox\|qemu"; then
+                ok "GPU: Virtual GPU — VM environment detected"
+            fi
+        else
+            warn "GPU: no GPU found via lspci"
+        fi
+    else
+        warn "GPU: lspci not available"
+    fi
+}
+
+check_tpm() {
+    log ""
+    log "=== TPM ==="
+    if [[ -e /dev/tpm0 || -e /dev/tpmrm0 ]]; then
+        ok "TPM: device found"
+    else
+        warn "TPM: not found — optional for secure boot"
+    fi
+}
+
+show_report() {
+    local color_ok color_warn color_fail nc
+    local summary
+
+    summary="Results: ${PASS} OK  ${WARN} warnings  ${FAIL} failures"
+    log ""
+    log "$summary"
+
+    if [[ "$FAIL" -gt 0 ]]; then
+        dialog --title "$TITLE" \
+            --colors \
+            --textbox "$REPORT" 30 70
+        dialog --title "$TITLE" \
+            --yesno "${summary}\n\nThere are FAILURES. Installation may not succeed.\nContinue anyway?" \
+            10 55
+        return $?
+    elif [[ "$WARN" -gt 0 ]]; then
+        dialog --title "$TITLE" \
+            --textbox "$REPORT" 30 70
+        dialog --title "$TITLE" \
+            --yesno "${summary}\n\nSome warnings found. Installation should work.\nContinue?" \
+            10 55
+        return $?
+    else
+        dialog --title "$TITLE" \
+            --textbox "$REPORT" 30 70
+        dialog --title "$TITLE" \
+
+        --msgbox "${summary}\n\nAll checks passed." 10 55
+
+fi
+
+}

@@ -218,6 +218,12 @@ install_aimos_components() {
         arch-chroot "$MOUNT" systemctl enable aimos-scheduler-dbus
         log "systemd unit enabled"
     fi
+
+    # kernel module via DKMS
+    if [[ -d /usr/src/aimos_scheduler-0.1 ]]; then
+        arch-chroot "$MOUNT" dkms install aimos_scheduler/0.1 >> "$LOG" 2>&1 || log "DKMS install failed (non-fatal)"
+        log "DKMS module installed"
+    fi
 }
 
 finish() {
