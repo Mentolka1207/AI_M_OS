@@ -10,7 +10,7 @@ from scheduler.kernel_iface import renice_via_kernel, is_kernel_module_loaded
 BUS_NAME = "org.aimos.Scheduler"
 OBJ_PATH = "/org/aimos/Scheduler"
 IFACE    = "org.aimos.Scheduler"
-VERSION  = "0.5.0"
+VERSION  = "0.9.0"
 
 
 class SchedulerService(dbus.service.Object):
