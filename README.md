@@ -13,7 +13,7 @@
 - **Go-демоны** — power, network, sensor мониторинг
 - **Glassmorphism UI** — кастомная GNOME Shell тема
 - **AIFS** — файловая система на базе btrfs с CoW и снапшотами
-- **Языковой стек** — C++, Go, Python, C#, Java, JavaScript, PostgreSQL
+- **Языковой стек** — C++, Go, Python, C#, JavaScript, PostgreSQL
 
 ## Архитектура
 
@@ -96,7 +96,6 @@ sudo mkarchiso -v -w /tmp/aimos-work -o ./out iso-profile/
 | Системные демоны | Go |
 | AI-демон | Python |
 | GUI приложения | C# (.NET + GTK4) |
-| Серверные компоненты | Java |
 | Конфигурация | JavaScript |
 | База данных | PostgreSQL |
 | Файловая система | AIFS (btrfs-based) |
