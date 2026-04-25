@@ -62,6 +62,19 @@ cd ..
 sudo mkarchiso -v -w /tmp/aimos-work -o ./out iso-profile/
 ```
 
+## Download
+
+
+
+| File | Size | Link |
+
+|------|------|------|
+
+| ISO Image | 3.1 GB | [SourceForge](https://sourceforge.net/projects/aimos/files/v0.9.0-rc/AI_M_OS-2026.04.24-x86_64.iso/download) |
+
+| Torrent | 15 KB | [GitHub](https://github.com/Mentolka1207/AI_M_OS/raw/master/AI_M_OS-2026.04.24-x86_64.torrent) |
+
+
 ## Roadmap
 
 | Версия | Статус | Описание |
