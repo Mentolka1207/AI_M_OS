@@ -1,6 +1,6 @@
 obj-m += aimos_scheduler.o
 
-KDIR := /lib/modules/6.19.11-arch1-1/build
+KDIR := /lib/modules/$(shell uname -r)/build
 
 all:
 	make -C $(KDIR) M=$(PWD) modules

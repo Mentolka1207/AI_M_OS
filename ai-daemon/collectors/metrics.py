@@ -87,8 +87,10 @@ def read_load_avg() -> float:
 def collect() -> SystemSnapshot:
     cpu_total, cpu_cores = read_cpu_usage()
     mem_total, mem_used, swap_total, swap_used = read_meminfo()
-    net_data = read_daemon("network") or {}
-    net_ifaces = net_data.get("ifaces", {})
+    net_data    = read_daemon("network") or {}
+    net_ifaces  = net_data.get("ifaces", {})
+    sensor_data = read_daemon("sensor") or {}
+    power_data  = read_daemon("power") or {}
     load = read_load_avg()
 
     return SystemSnapshot(
@@ -101,4 +103,6 @@ def collect() -> SystemSnapshot:
         swap_used_kb=swap_used,
         net_ifaces=net_ifaces,
         load_avg_1=load,
+        cpu_temp_c=float(sensor_data.get("cpu_temp_c", 0.0)),
+        cpu_governor=str(power_data.get("cpu_governor", "unknown")),
     )

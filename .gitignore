@@ -12,6 +12,11 @@ aimos-work/
 go-daemons/build/
 *.exe
 
+# Go binaries
+go-daemons/network-daemon
+go-daemons/power-daemon
+go-daemons/sensor-daemon
+
 # OS
 .DS_Store
 Thumbs.db
@@ -21,5 +26,14 @@ Thumbs.db
 .idea/
 *.swp
 iso-profile/airootfs/etc/locale.gen
+
+# C# build artifacts
 csharp-apps/**/bin/
 csharp-apps/**/obj/
+
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.py.save
+**/*.py.save.*
