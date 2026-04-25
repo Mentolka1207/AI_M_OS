@@ -1,105 +1,129 @@
 # AI_M_OS
+**AI_M_OS** is a custom operating system based on Arch Linux with AI integrated at the kernel level.
 
-**AI_M_OS** — кастомная операционная система на базе Arch Linux с встроенным AI на уровне ядра.
-
-![Alpha](https://img.shields.io/badge/version-RC%200.9.0-blue)
+![Version](https://img.shields.io/badge/version-RC%200.9.0-blue)
 ![Arch](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
 ![GNOME](https://img.shields.io/badge/DE-GNOME%2050-4a86cf)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-## Особенности
+## Features
 
-- **AI-планировщик** — Python daemon, мониторинг нагрузки в реальном времени
-- **Go-демоны** — power, network, sensor мониторинг
-- **Glassmorphism UI** — кастомная GNOME Shell тема
-- **AIFS** — файловая система на базе btrfs с CoW и снапшотами
-- **Языковой стек** — C++, Go, Python, C#, JavaScript, PostgreSQL
+- **AI Scheduler** — Python daemon with real-time load monitoring
+- **Kernel Module** — `aimos_scheduler.ko`, integrated with AI daemon via `/proc`
+- **Go Daemons** — power, network, sensor monitoring via Unix sockets
+- **C# System Monitor** — GTK4 app with Glassmorphism UI
+- **D-Bus Integration** — GNOME Shell extension for the scheduler
+- **AIFS** — btrfs-based filesystem with CoW and snapshots
 
-## Архитектура
-
-
-
-
+## Architecture
 
 AI_M_OS/
-├── iso-profile/          # archiso профиль для сборки ISO
-│   ├── profiledef.sh
-│   ├── packages.x86_64
-│   ├── airootfs/         # Файлы live-системы
-│   └── airootfs.sh       # Кастомизация chroot
-├── go-daemons/           # Системные Go-демоны
-│   ├── cmd/
-│   │   ├── power-daemon/
-│   │   ├── network-daemon/
-│   │   └── sensor-daemon/
-│   └── go.mod
-├── docs/                 # Документация
-└── scripts/              # Вспомогательные скрипты
+├── ai-daemon/                  # Python AI daemon
+│   ├── scheduler/              # Scheduler (kernel_iface.py, heuristics.py)
+│   ├── collectors/             # Metrics collectors
+│   ├── dbus/                   # D-Bus service and GTK4 app
+│   ├── db/                     # PostgreSQL logger
+│   └── proto/                  # Protobuf client
+├── csharp-apps/
+│   └── SystemMonitor/          # C# GTK4 System Monitor
+│       ├── Widgets/            # CPU, RAM, Disk, Network widgets
+│       ├── Services/           # SystemMetrics service
+│       └── themes/             # Glassmorphism CSS
+├── go-daemons/
+│   └── cmd/
+│       ├── power-daemon/       # Power management
+│       ├── network-daemon/     # Network monitoring
+│       └── sensor-daemon/      # Temperature and fans
+├── kernel-modules/
+│   └── aimos_scheduler/        # Kernel module (C + DKMS)
+├── iso-profile/                # archiso build profile
+├── desktop/                    # .desktop files and metadata
+└── systemd/                    # systemd services
 
+## Build Requirements
 
-## Требования для сборки
-
-- Arch Linux (WSL2 или нативно)
-- `archiso` пакет
+- Arch Linux (WSL2 or native)
+- `archiso`, `base-devel`, `linux-headers`
 - `go` 1.21+
-- 10GB свободного места
+- `python3`, `pip`
+- `dotnet-sdk` 10.0+
+- 10 GB free disk space
 
-## Быстрый старт
+## Quick Start
 
 ```bash
-# Клонировать
+# Clone the repository
 git clone https://github.com/Mentolka1207/AI_M_OS.git
 cd AI_M_OS
 
-# Собрать Go-демоны
+# Build Go daemons
 cd go-daemons
 go build ./cmd/power-daemon/
 go build ./cmd/network-daemon/
 go build ./cmd/sensor-daemon/
-
-# Собрать ISO
 cd ..
+
+# Install Python AI daemon
+cd ai-daemon
+pip install -r requirements.txt
+cd ..
+
+# Build C# System Monitor
+cd csharp-apps/SystemMonitor
+dotnet build
+cd ../..
+
+# Build kernel module
+cd kernel-modules/aimos_scheduler
+make
+sudo insmod aimos_scheduler.ko
+cd ../..
+
+# Build ISO
 sudo mkarchiso -v -w /tmp/aimos-work -o ./out iso-profile/
 ```
 
 ## Download
 
-
-
 | File | Size | Link |
-
 |------|------|------|
-
 | ISO Image | 3.1 GB | [SourceForge](https://sourceforge.net/projects/aimos/files/v0.9.0-rc/AI_M_OS-2026.04.24-x86_64.iso/download) |
-
 | Torrent | 15 KB | [GitHub](https://github.com/Mentolka1207/AI_M_OS/raw/master/AI_M_OS-2026.04.24-x86_64.torrent) |
-
-
-## Roadmap
-
-| Версия | Статус | Описание |
-|---|---|---|
-| Alpha 0.1.0 | ✅ Готово | Base ISO, GNOME 50, Go-демоны, AI-daemon |
-| Alpha 0.2.0 | ✅ Готово | C# GUI приложения, glassmorphism улучшения |
-| Alpha 0.3.0 | ✅ Готово | AI-daemon, PostgreSQL, scheduler heuristics |
-| Beta 0.5.0 | ✅ Готово | AI-планировщик kernel module, D-Bus, Gnome интеграция |
-| RC 0.9.0 | ✅ Готово | Реальное железо, x86_64 |
-| Release 1.0 | ⏳ | Стабильный релиз |
 
 > **SHA256:** `1610928eda8696b8311b0dee622925a9e605b29042ec6f14d6a12489c155e9e3`
 
-## Стек технологий
+## Roadmap
 
-| Компонент | Технология |
+| Version | Status | Description |
+|---|---|---|
+| Alpha 0.1.0 | ✅ Done | Base ISO, GNOME 50, Go daemons, AI daemon |
+| Alpha 0.2.0 | ✅ Done | C# GUI apps, Glassmorphism UI |
+| Alpha 0.3.0 | ✅ Done | AI daemon, PostgreSQL, scheduler heuristics |
+| Beta 0.5.0 | ✅ Done | AI scheduler kernel module, D-Bus, GNOME integration |
+| RC 0.9.0 | ✅ Done | Real hardware support, x86_64 |
+| Release 1.0 | ⏳ | Stable release |
+
+## Tech Stack
+
+| Component | Technology |
 |---|---|
-| Ядро | Linux (Arch) + C++ patches |
-| Системные демоны | Go |
-| AI-демон | Python |
-| GUI приложения | C# (.NET + GTK4) |
-| Конфигурация | JavaScript |
-| База данных | PostgreSQL |
-| Файловая система | AIFS (btrfs-based) |
+| Kernel | Linux (Arch) + kernel module (C) |
+| System daemons | Go |
+| AI daemon | Python |
+| GUI apps | C# (.NET + GTK4) |
+| Configuration | JavaScript |
+| Database | PostgreSQL |
+| Filesystem | AIFS (btrfs-based) |
 
-## Лицензия
+## System Requirements
 
-MIT License — см. [LICENSE](LICENSE)
+| | Minimum | Recommended |
+|---|---|---|
+| RAM | 4 GB | 8 GB |
+| Disk | 30 GB | 50 GB |
+| CPU | x86_64 | x86_64 multi-core |
+| GPU | — | NVIDIA/AMD |
+
+## License
+
+MIT License — see [LICENSE](LICENSE)
