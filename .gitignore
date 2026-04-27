@@ -44,3 +44,13 @@ kernel-modules/aimos_scheduler/*.mod
 kernel-modules/aimos_scheduler/*.mod.c
 kernel-modules/aimos_scheduler/Module.symvers
 kernel-modules/aimos_scheduler/modules.order
+
+# Kernel module build artifacts
+kernel-modules/**/*.cmd
+kernel-modules/**/.*.cmd
+kernel-modules/**/*.o
+kernel-modules/**/*.ko
+kernel-modules/**/*.mod
+kernel-modules/**/*.mod.c
+kernel-modules/**/Module.symvers
+kernel-modules/**/modules.order
