@@ -35,12 +35,24 @@ All notable changes to AI_M_OS are documented here.
 
 --
 
-## [Alpha 0.3.0] - 2026-04
+## [Alpha 0.3.0] - 2026-04-27
 
 ### Added
-- AI daemon scheduler heuristics (`heuristics.py`)
-- PostgreSQL integration for metrics storage
-- 'kernel_iface.py' - Python <-> kernel module interface
+- 'aimos_scheduler.c' - kernel module exposing '/proc/aimos_scheduler' (read/write)
+- 'aimos_scheduler.ko' built and tested on kernel 6.19.14-arch1-1
+- Kernel module autoload via '/etc/modules-load.d/aimos_scheduler.conf'
+- 'kernel_iface.py' - complete parser for '/proc/aimos_scheduler' output (6 fields: status, version, last_pid, last_nice, total_ops, last_error)
+- 'heuristics.py' - CPU/RAM/load_avg scheduler heuristics with renice via kernel
+- Fallback to `os.setpriority()` when kernel module is not loaded
+- PostgreSQL integration for metrics storage (optional, `AIMOS_NO_DB=1` flag)
+
+### Fixed
+- Removed duplicate `kernel/scheduler/` directory (canonical: `kernel-modules/aimos_scheduler/`)
+- Added kernel build artifacts to `.gitignore` (`.cmd`, `.o`, `.ko`, `.mod` files)
+
+### Changed
+- README rewritten as honest roadmap document (  Done /  In progress /  Planned)
+- Version badge updated to Alpha 0.3.0
 
 ---
 
