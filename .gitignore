@@ -37,3 +37,10 @@ csharp-apps/**/obj/
 **/*.pyc
 **/*.py.save
 **/*.py.save.*
+kernel-modules/aimos_scheduler/*.ko
+kernel-modules/aimos_scheduler/*.o
+kernel-modules/aimos_scheduler/*.cmd
+kernel-modules/aimos_scheduler/*.mod
+kernel-modules/aimos_scheduler/*.mod.c
+kernel-modules/aimos_scheduler/Module.symvers
+kernel-modules/aimos_scheduler/modules.order
