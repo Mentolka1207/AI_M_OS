@@ -20,6 +20,8 @@ class SystemSnapshot:
     swap_used_kb: int
     net_ifaces: dict   # {"eth0": {"rx_bps": .., "tx_bps": ..}}
     load_avg_1: float  # from /proc/loadavg
+    cpu_temp_c: float = 0.0
+    cpu_governor: str = "unknown"
 
 
 # ── CPU ──────────────────────────────────────────────────────────────────────
