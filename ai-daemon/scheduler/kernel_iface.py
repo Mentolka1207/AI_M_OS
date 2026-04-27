@@ -54,3 +54,24 @@ def _renice_fallback(pid: int, new_nice: int) -> bool:
         return False
     except ProcessLookupError:
         return False
+
+
+def parse_scheduler_status(raw: str) -> dict:
+    """Parse /proc/aimos_scheduler status string."""
+    if not raw:
+        return {"active": False, "raw": ""}
+    return {
+        "active": "active" in raw.lower(),
+        "raw": raw
+    }
+
+
+def get_scheduler_info() -> dict:
+    """Return combined kernel module status."""
+    loaded = is_kernel_module_loaded()
+    if not loaded:
+        return {"loaded": False, "active": False, "raw": ""}
+    raw = read_scheduler_status()
+    info = parse_scheduler_status(raw or "")
+    info["loaded"] = True
+    return info
