@@ -2,7 +2,7 @@
 
 **AI_M_OS** is a custom operating system based on Arch Linux with AI integrated at the kernel level.
 
-![version](https://img.shields.io/badge/version-Alpha%200.3.0-blue)
+![version](https://img.shields.io/badge/version-Beta%200.5.0-blue)
 ![base](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
 ![DE](https://img.shields.io/badge/DE-GNOME%2050-4a86cf)
 ![kernel](https://img.shields.io/badge/kernel-6.19.14--arch1-orange)
@@ -21,8 +21,9 @@
 | `aimos_scheduler` kernel module | ✅ Done |
 | `/proc/aimos_scheduler` kernel interface | ✅ Done |
 | Glassmorphism GNOME theme (CSS) | ✅ Done |
-| C# GTK4 System Monitor | 🔄 In progress |
-| D-Bus integration + GNOME Shell extension | 🔄 In progress |
+| D-Bus service (`org.aimos.Scheduler`) | ✅ Done |
+| GNOME Shell extension (top bar indicator) | ✅ Done |
+| C# GTK4 System Monitor | ✅ Done |
 | PostgreSQL event logger | 🔄 In progress |
 | AIFS filesystem (btrfs-based, CoW) | ⏳ Planned |
 | ARM64 support | ⏳ Planned |
@@ -35,8 +36,10 @@
 
 - **AI Scheduler** — Python daemon with real-time CPU, RAM and load average monitoring. Applies `renice` heuristics automatically under high load.
 - **Kernel Module** — `aimos_scheduler.ko` exposes `/proc/aimos_scheduler` for read/write. Python daemon communicates with the kernel directly; falls back to `os.setpriority()` if module is absent.
+- **D-Bus Service** — `org.aimos.Scheduler` on the system bus. Exposes `SetProcessPriority`, `GetProcessPriority`, `IsKernelModuleLoaded` and emits `PriorityChanged` signal.
+- **GNOME Shell Extension** — top bar indicator showing `󰒓 ACTIVE` / `󰒓 IDLE` / `✕ OFFLINE`. Subscribes to `PriorityChanged` signal in real time. Click to open the GTK4 process manager.
 - **Go Daemons** — lightweight system daemons for power, network and sensor monitoring.
-- **Glassmorphism UI** — custom GNOME Shell CSS theme with blur and transparency effects.
+- **C# GTK4 System Monitor** — Glassmorphism UI with CPU, RAM, Disk, Network and Scheduler widgets.
 - **AIFS** — planned btrfs-based filesystem with Copy-on-Write and snapshot support.
 
 ---
@@ -51,11 +54,23 @@ AI_M_OS/
 │   │   ├── kernel_iface.py     # /proc/aimos_scheduler interface ✅
 │   │   └── heuristics.py       # CPU/RAM/load heuristics ✅
 │   ├── collectors/             # Metrics collectors
-│   ├── dbus/                   # D-Bus service (in progress)
+│   ├── dbus/                   # D-Bus service ✅
+│   │   ├── scheduler_service.py    # org.aimos.Scheduler daemon
+│   │   └── aimos_scheduler_app.py  # GTK4 process manager
 │   ├── db/                     # PostgreSQL event logger (in progress)
 │   └── proto/                  # Protobuf client (planned)
 ├── csharp-apps/
-│   └── SystemMonitor/          # C# GTK4 System Monitor (in progress)
+│   └── SystemMonitor/          # C# GTK4 System Monitor ✅
+│       └── Widgets/
+│           ├── CpuWidget.cs
+│           ├── RamWidget.cs
+│           ├── DiskWidget.cs
+│           ├── NetworkWidget.cs
+│           └── SchedulerWidget.cs  # reads /proc/aimos_scheduler ✅
+├── gnome-extension/            # GNOME Shell extension ✅
+│   ├── extension.js            # top bar indicator, D-Bus client
+│   ├── metadata.json
+│   └── stylesheet.css
 ├── go-daemons/
 │   └── cmd/
 │       ├── power-daemon/       # Power management ✅
@@ -63,27 +78,32 @@ AI_M_OS/
 │       └── sensor-daemon/      # Temperature and fans ✅
 ├── kernel-modules/
 │   └── aimos_scheduler/        # Kernel module C + DKMS ✅
+├── dbus-policy/                # D-Bus security policy ✅
 ├── iso-profile/                # archiso build profile ✅
-├── desktop/                    # .desktop files (planned)
-└── systemd/                    # systemd units (planned)
+├── desktop/                    # .desktop files and metadata ✅
+└── systemd/                    # systemd service units ✅
 ```
 
 ---
 
-## How the kernel interface works
+## How the full stack connects
 
 ```
-heuristics.py
-     │
-     │  renice_via_kernel(pid, nice)
-     ▼
+GNOME Shell extension
+        │  D-Bus signal: PriorityChanged
+        │  D-Bus call:   IsKernelModuleLoaded
+        ▼
+org.aimos.Scheduler  (scheduler_service.py)
+        │
+        │  renice_via_kernel(pid, nice)
+        ▼
 kernel_iface.py
-     │
-     │  write: "pid nice\n"       read: "status: active\n..."
-     ▼
+        │
+        │  write: "pid nice\n"     read: "status: active\n..."
+        ▼
 /proc/aimos_scheduler
-     │
-     ▼
+        │
+        ▼
 aimos_scheduler.ko  →  set_user_nice()  [kernel]
 ```
 
@@ -96,7 +116,7 @@ If `aimos_scheduler.ko` is not loaded, `kernel_iface.py` falls back to `os.setpr
 - Arch Linux (WSL2 or native)
 - `archiso`, `base-devel`, `linux-headers`
 - `go` 1.21+
-- `python3`, `pip`
+- `python3`, `python-dbus`, `pip`
 - `dotnet-sdk` 10.0+
 - 10 GB free disk space
 
@@ -121,8 +141,20 @@ make
 sudo insmod aimos_scheduler.ko
 cat /proc/aimos_scheduler   # verify: status: active
 
+# Install D-Bus policy and service
+sudo cp dbus-policy/org.aimos.Scheduler.conf /etc/dbus-1/system.d/
+sudo cp systemd/aimos-scheduler-dbus.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now aimos-scheduler-dbus
+
+# Install GNOME Shell extension
+EXT=~/.local/share/gnome-shell/extensions/aimos-scheduler@aimos.ai-m-os
+mkdir -p $EXT
+cp gnome-extension/* $EXT/
+gnome-extensions enable aimos-scheduler@aimos.ai-m-os
+
 # Run AI daemon (no DB mode)
-cd ../../ai-daemon
+cd ai-daemon
 AIMOS_NO_DB=1 sudo -E python3 daemon.py
 
 # Build ISO (optional)
@@ -132,8 +164,6 @@ sudo mkarchiso -v -w /tmp/aimos-work -o ./out iso-profile/
 ---
 
 ## Kernel module autoload
-
-The module is registered for autoload on boot via `modules-load.d`:
 
 ```
 /etc/modules-load.d/aimos_scheduler.conf
@@ -151,8 +181,9 @@ Verify with `modinfo aimos_scheduler` and `cat /proc/aimos_scheduler` after rebo
 | Kernel interface | C (kernel module) |
 | System daemons | Go |
 | AI daemon + scheduler | Python |
+| D-Bus service | Python (`python-dbus`) |
 | GUI apps | C# (.NET + GTK4) |
-| Desktop config | JavaScript |
+| GNOME Shell extension | JavaScript (ESM) |
 | Database | PostgreSQL |
 | Filesystem | AIFS (btrfs-based, planned) |
 
@@ -176,8 +207,8 @@ Verify with `modinfo aimos_scheduler` and `cat /proc/aimos_scheduler` after rebo
 | Alpha 0.1.0 | ✅ Done | Base ISO, GNOME 50, Go daemons |
 | Alpha 0.2.0 | ✅ Done | Glassmorphism UI, Python AI daemon |
 | Alpha 0.3.0 | ✅ Done | Scheduler heuristics, `aimos_scheduler` kernel module, `/proc` interface |
-| Beta 0.5.0 | 🔄 In progress | C# System Monitor, D-Bus, GNOME Shell extension, PostgreSQL logger |
-| RC 0.9.0 | ⏳ Planned | Real hardware support, ARM64, DKMS packaging |
+| Beta 0.5.0 | ✅ Done | C# System Monitor, D-Bus service, GNOME Shell extension |
+| RC 0.9.0 | ⏳ Planned | PostgreSQL logger, real hardware support, ARM64, DKMS packaging |
 | Release 1.0 | ⏳ Planned | Stable release, AIFS filesystem, full documentation |
 
 ---
