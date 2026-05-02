@@ -1,0 +1,18 @@
+pkgname=aimos-scheduler-dkms
+pkgver=0.5.0
+pkgrel=1
+pkgdesc="AI_M_OS kernel scheduler module (DKMS)"
+arch=('x86_64')
+license=('MIT')
+depends=('dkms' 'linux-headers')
+_srcname=aimos_scheduler
+
+source=("${_srcname}.c" "${_srcname}.mod.c" "Makefile" "dkms.conf")
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+    install -dm755 "${pkgdir}/usr/src/${_srcname}-${pkgver}"
+    for f in "${source[@]}"; do
+        install -m644 "${f}" "${pkgdir}/usr/src/${_srcname}-${pkgver}/"
+    done
+}
