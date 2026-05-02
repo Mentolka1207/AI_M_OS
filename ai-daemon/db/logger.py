@@ -22,7 +22,7 @@ def init_schema(conn):
     schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
     with open(schema_path) as f:
         sql = f.read()
-    with conn.cu(r) as cur:
+    with conn.cursor() as cur:
         cur.execute(sql)
     conn.commit()
     logger.info("Schema initialized")
