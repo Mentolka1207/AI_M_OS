@@ -5,9 +5,11 @@ Requires=dbus.service
 
 [Service]
 Type=simple
+User=aimos
 ExecStart=/usr/bin/python3 /home/aimos/AI_M_OS/ai-daemon/dbus/scheduler_service.py
 Restart=on-failure
 RestartSec=3
+Environment=PYTHONPATH=/home/aimos/AI_M_OS/ai-daemon
 
 [Install]
 WantedBy=multi-user.target

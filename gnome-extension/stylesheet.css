@@ -1,0 +1,16 @@
+/* AI_M_OS Scheduler — top bar indicator styles */
+
+.aimos-indicator-label {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0 6px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.aimos-active {
+    color: #33d9e0;   /* cyan — matches glassmorphism theme */
+}
+
+.aimos-offline {
+    color: #ff8c35;   /* orange — matches rate-tx colour */
+}

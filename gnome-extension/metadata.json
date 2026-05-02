@@ -1,0 +1,8 @@
+{
+  "name": "AI_M_OS Scheduler",
+  "description": "Shows aimos_scheduler kernel module status in the GNOME top bar",
+  "uuid": "aimos-scheduler@aimos.ai-m-os",
+  "version": 1,
+  "shell-version": ["46", "47", "48", "49", "50"],
+  "url": "https://github.com/Mentolka1207/AI_M_OS"
+}

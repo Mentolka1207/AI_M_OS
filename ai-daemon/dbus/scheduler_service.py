@@ -1,9 +1,11 @@
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+import sys
+sys.path.insert(0, "/usr/lib/python3.14/site-packages")
+# Import dbus BEFORE adding ai-daemon to path (avoids shadowing by local dbus/ dir)
 import dbus
 import dbus.service
 import dbus.mainloop.glib
+import os
+sys.path.insert(0, "/home/aimos/AI_M_OS/ai-daemon")
 from gi.repository import GLib
 from scheduler.kernel_iface import renice_via_kernel, is_kernel_module_loaded
 
