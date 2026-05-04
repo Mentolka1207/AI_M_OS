@@ -24,7 +24,7 @@
 | D-Bus service (`org.aimos.Scheduler`) | ✅ Done |
 | GNOME Shell extension (top bar indicator) | ✅ Done |
 | C# GTK4 System Monitor | ✅ Done |
-| PostgreSQL event logger | 🔄 In progress |
+| PostgreSQL event logger | ✅ Done |
 | AIFS filesystem (btrfs-based, CoW) | ⏳ Planned |
 | ARM64 support | ⏳ Planned |
 | Real hardware testing | ⏳ Planned |
@@ -57,7 +57,7 @@ AI_M_OS/
 │   ├── dbus/                   # D-Bus service ✅
 │   │   ├── scheduler_service.py    # org.aimos.Scheduler daemon
 │   │   └── aimos_scheduler_app.py  # GTK4 process manager
-│   ├── db/                     # PostgreSQL event logger (in progress)
+│   ├── db/                     # PostgreSQL event logger ✅
 │   └── proto/                  # Protobuf client (planned)
 ├── csharp-apps/
 │   └── SystemMonitor/          # C# GTK4 System Monitor ✅
