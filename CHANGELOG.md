@@ -2,6 +2,20 @@
 
 All notable changes to AI_M_OS are documented here.
 
+## [Unreleased] - RC 0.9.0 progress - 2026-05-04
+
+### Added
+- DKMS packaging for 'aimos_scheduler' - module auto-rebuilds on kernel update
+- 'PKGBULD' for 'aimos-scheduler-dkms' Arch package
+- PostgreSQL event logger completed - all 4 heuristic rules ('high_cpu', 'high_load', 'low_cpu_restore') write to 'scheduler_events' table
+- 'schema.sql' applied: 'metrics_cpu', metrics_memory', 'metrics_network', 'scheduler_events' tables
+
+### Fixed
+- 'heuristics.py': 'log_scheduler_event()' now called for all 4 rules, not just 'high_cpu'
+- 'dkms.conf': version updated to '0.5.0', added 'BUILT_MODULE_LOCATION[0]'
+
+---
+
 ## [RC 0.9.0] - 2026-04-26
 
 ##Changed
