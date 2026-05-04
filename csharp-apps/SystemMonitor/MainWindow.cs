@@ -33,8 +33,6 @@ public class MainWindow : Adw.ApplicationWindow, IDisposable
         _networkWidget   = new NetworkWidget();
         _diskWidget      = new DiskWidget();
         _schedulerWidget = new SchedulerWidget();
-        _schedulerWidget = new SchedulerWidget();
-        _schedulerWidget = new SchedulerWidget();
 
         var content = Box.New(Orientation.Vertical, 16);
         content.AddCssClass("content-box");
@@ -43,8 +41,6 @@ public class MainWindow : Adw.ApplicationWindow, IDisposable
         content.Append(_networkWidget.Root);
         content.Append(_diskWidget.Root);
         content.Append(_schedulerWidget.Root);
-        content.Append(_schedulerWidget.Root);
-        content.Append(_schedulerWidget.Root);   // ← добавлен последним
 
         scroll.Child = content;
 
@@ -64,8 +60,6 @@ public class MainWindow : Adw.ApplicationWindow, IDisposable
         _ramWidget.Dispose();
         _networkWidget.Dispose();
         _diskWidget.Dispose();
-        _schedulerWidget.Dispose();
-        _schedulerWidget.Dispose();
         _schedulerWidget.Dispose();
     }
 

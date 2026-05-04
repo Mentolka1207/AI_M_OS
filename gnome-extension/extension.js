@@ -78,7 +78,7 @@ class SchedulerIndicator extends PanelMenu.Button {
                         'PriorityChanged',
                         (_p, _s, [pid, oldNice, newNice]) => {
                             this._lastItem.label.set_text(
-                                'Last: pid ${pid}  ${oldNice} -> ${newNice}');
+                                `Last: pid ${pid}  ${oldNice} -> ${newNice}`);
                         }
                     );
                     this._startPolling();
@@ -107,7 +107,7 @@ class SchedulerIndicator extends PanelMenu.Button {
                            : 'Status: daemon running, module absent');
                 try {
                     const ver = this._proxy.Version;
-                    if (ver) this._versionItem.label.set_text('Version: ${ver}');
+                    if (ver) this._versionItem.label.set_text(`Version: ${ver}`);
                 } catch (_) {}
             });
         } catch (_e) { this._setOffline(); }
@@ -127,7 +127,7 @@ class SchedulerIndicator extends PanelMenu.Button {
                 GLib.SpawnFlags.SEARCH_PATH | GLib.SpawnFlags.DO_NOT_REAP_CHILD,
                 null);
         } catch (e) {
-            Main.notifyError('AI_M_OS', 'Cannot open app: ${e.message}');
+            Main.notifyError('AI_M_OS', `Cannot open app: ${e.message}`);
         }
     }
 
