@@ -5,7 +5,7 @@ iso_name="AI_M_OS"
 iso_label="AIMOS_BETA"
 iso_publisher="AI_M_OS Project"
 iso_application="AI_M_OS Beta 0.5.0"
-iso_version="$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y.%m.%d)"
+iso_version="RC-0.9.0"
 install_dir="arch"
 buildmodes=('iso')
 bootmodes=('bios.syslinux'
