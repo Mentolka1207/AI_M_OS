@@ -18,7 +18,6 @@
 
 | Component | Status |
 |---|---|
-|---|---|
 | Base ISO + GNOME 50 | ✅ Done |
 | Go daemons (power, network, sensor) | ✅ Done |
 | Python AI daemon + metrics | ✅ Done |
@@ -171,7 +170,7 @@ AIMOS_NO_DB=1 sudo -E python3 daemon.py
 
 # Build ISO (optional)
 sudo mkarchiso -v -w /tmp/aimos-work -o ./out iso-profile/
-'''
+```
 
 ---
 
