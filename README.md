@@ -2,17 +2,22 @@
 
 **AI_M_OS** is a custom operating system based on Arch Linux with AI integrated at the kernel level.
 
-![version](https://img.shields.io/badge/version-Beta%200.5.0-blue)
+![version](https://img.shields.io/badge/version-RC%200.9.0-blue)
 ![base](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
 ![DE](https://img.shields.io/badge/DE-GNOME%2050-4a86cf)
 ![kernel](https://img.shields.io/badge/kernel-6.19.14--arch1-orange)
 ![license](https://img.shields.io/badge/license-MIT-green)
+[![Download AI_M_OS](https://img.shields.io/sourceforge/dm/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
+[![Download AI_M_OS](https://img.shields.io/sourceforge/dt/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
+
+[![Download AI_M_OS](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/ai-m-os/files/)
 
 ---
 
 ## Status
 
 | Component | Status |
+|---|---|
 |---|---|
 | Base ISO + GNOME 50 | ✅ Done |
 | Go daemons (power, network, sensor) | ✅ Done |
@@ -25,6 +30,7 @@
 | GNOME Shell extension (top bar indicator) | ✅ Done |
 | C# GTK4 System Monitor | ✅ Done |
 | PostgreSQL event logger | ✅ Done |
+| DKMS packaging (`aimos-scheduler-dkms`) | ✅ Done |
 | AIFS filesystem (btrfs-based, CoW) | ⏳ Planned |
 | ARM64 support | ⏳ Planned |
 | Real hardware testing | ⏳ Planned |
@@ -40,6 +46,7 @@
 - **GNOME Shell Extension** — top bar indicator showing `󰒓 ACTIVE` / `󰒓 IDLE` / `✕ OFFLINE`. Subscribes to `PriorityChanged` signal in real time. Click to open the GTK4 process manager.
 - **Go Daemons** — lightweight system daemons for power, network and sensor monitoring.
 - **C# GTK4 System Monitor** — Glassmorphism UI with CPU, RAM, Disk, Network and Scheduler widgets.
+-  **DKMS Packaging** — `aimos_scheduler` kernel module auto-rebuilds on kernel updates via DKMS.
 - **AIFS** — planned btrfs-based filesystem with Copy-on-Write and snapshot support.
 
 ---
@@ -88,7 +95,7 @@ AI_M_OS/
 
 ## How the full stack connects
 
-```
+'''
 GNOME Shell extension
         │  D-Bus signal: PriorityChanged
         │  D-Bus call:   IsKernelModuleLoaded
@@ -110,6 +117,7 @@ aimos_scheduler.ko  →  set_user_nice()  [kernel]
 If `aimos_scheduler.ko` is not loaded, `kernel_iface.py` falls back to `os.setpriority()` transparently.
 
 ---
+
 
 ## Build Requirements
 
@@ -135,10 +143,11 @@ cd go-daemons && go build ./cmd/... && cd ..
 # Install Python AI daemon
 cd ai-daemon && pip install -r requirements.txt && cd ..
 
-# Build and load kernel module
-cd kernel-modules/aimos_scheduler
-make
-sudo insmod aimos_scheduler.ko
+# Build and load kernel module (via DKMS)
+sudo cp -r kernel-modules/aimos_scheduler /usr/src/aimos_scheduler-0.5.0
+sudo dkms add aimos_scheduler/0.5.0
+sudo dkms build aimos_scheduler/0.5.0
+sudo dkms install aimos_scheduler/0.5.0
 cat /proc/aimos_scheduler   # verify: status: active
 
 # Install D-Bus policy and service
@@ -153,13 +162,16 @@ mkdir -p $EXT
 cp gnome-extension/* $EXT/
 gnome-extensions enable aimos-scheduler@aimos.ai-m-os
 
-# Run AI daemon (no DB mode)
+# Run AI daemon (with PostgreSQL)
 cd ai-daemon
+AIMOS_DB_DSN="postgresql://aimos:aimos@localhost/aimos_metrics" sudo -E python3 daemon.py
+
+# Run AI daemon (no DB mode)
 AIMOS_NO_DB=1 sudo -E python3 daemon.py
 
 # Build ISO (optional)
 sudo mkarchiso -v -w /tmp/aimos-work -o ./out iso-profile/
-```
+'''
 
 ---
 
@@ -208,8 +220,15 @@ Verify with `modinfo aimos_scheduler` and `cat /proc/aimos_scheduler` after rebo
 | Alpha 0.2.0 | ✅ Done | Glassmorphism UI, Python AI daemon |
 | Alpha 0.3.0 | ✅ Done | Scheduler heuristics, `aimos_scheduler` kernel module, `/proc` interface |
 | Beta 0.5.0 | ✅ Done | C# System Monitor, D-Bus service, GNOME Shell extension |
-| RC 0.9.0 | ⏳ Planned | PostgreSQL logger, real hardware support, ARM64, DKMS packaging |
+| RC 0.9.0 | 🔄 In Progress | PostgreSQL logger ✅, DKMS packaging ✅, real hardware support, ARM64 |
 | Release 1.0 | ⏳ Planned | Stable release, AIFS filesystem, full documentation |
+
+---
+
+## Download
+
+- **GitHub Releases:** [github.com/Mentolka1207/AI_M_OS/releases](https://github.com/Mentolka1207/AI_M_OS/releases)
+- **SourceForge:** [sourceforge.net/projects/ai-m-os](https://sourceforge.net/projects/ai-m-os/files/)
 
 ---
 
