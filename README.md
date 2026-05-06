@@ -95,7 +95,7 @@ AI_M_OS/
 
 ## How the full stack connects
 
-'''
+```
 GNOME Shell extension
         │  D-Bus signal: PriorityChanged
         │  D-Bus call:   IsKernelModuleLoaded
