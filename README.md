@@ -39,14 +39,14 @@
 
 ## Features
 
-- **AI Scheduler** — Python daemon with real-time CPU, RAM and load average monitoring. Applies `renice` heuristics automatically under high load.
-- **Kernel Module** — `aimos_scheduler.ko` exposes `/proc/aimos_scheduler` for read/write. Python daemon communicates with the kernel directly; falls back to `os.setpriority()` if module is absent.
-- **D-Bus Service** — `org.aimos.Scheduler` on the system bus. Exposes `SetProcessPriority`, `GetProcessPriority`, `IsKernelModuleLoaded` and emits `PriorityChanged` signal.
-- **GNOME Shell Extension** — top bar indicator showing `󰒓 ACTIVE` / `󰒓 IDLE` / `✕ OFFLINE`. Subscribes to `PriorityChanged` signal in real time. Click to open the GTK4 process manager.
-- **Go Daemons** — lightweight system daemons for power, network and sensor monitoring.
-- **C# GTK4 System Monitor** — Glassmorphism UI with CPU, RAM, Disk, Network and Scheduler widgets.
--  **DKMS Packaging** — `aimos_scheduler` kernel module auto-rebuilds on kernel updates via DKMS.
-- **AIFS** — planned btrfs-based filesystem with Copy-on-Write and snapshot support.
+- **AI Scheduler** — Python daemon with real-time CPU, RAM, and load average monitoring via `/proc/stat`, `/proc/meminfo`, `/proc/loadavg`. Automatically applies `renice` heuristics: throttles the highest-CPU user process when CPU > 85% or load > 1.5× core count; restores nice=0 when CPU < 20%.
+- **Kernel Module** — `aimos_scheduler.ko` exposes `/proc/aimos_scheduler`. The daemon writes `<pid> <nice>\n`; the kernel calls `set_user_nice()`. Falls back to `os.setpriority()` transparently if module is absent.
+- **D-Bus Service** — `org.aimos.Scheduler` on the system bus. Methods: `SetProcessPriority(ii)→b`, `GetProcessPriority(i)→i`, `IsKernelModuleLoaded()→b`. Signal: `PriorityChanged(iii)`.
+- **GNOME Shell Extension** — top bar indicator (`[] ACTIVE` / `[] IDLE` / `X OFFLINE`). Polls D-Bus every 3 seconds. Subscribes to `PriorityChanged` signal. Spawns `aimos_scheduler_app.py` on click.
+- **Go Daemons** — three daemons listening on Unix sockets at `/run/aimos/*.sock`, each returning one JSON payload per connection: power (CPU governor, freq, memory, uptime), network (`/proc/net/dev` rx/tx rates), sensor (CPU temp via hwmon/thermal, load avg, disk I/O ops).
+- **C# GTK4 System Monitor** — Glassmorphism UI (`.NET 10`, `GirCore.Gtk-4.0`). Five widgets polling at 1–2 s intervals: CPU, RAM, Disk, Network, Scheduler. `SchedulerWidget` parses 6 fields from `/proc/aimos_scheduler`: `status`, `version`, `last_pid`, `last_nice`, `total_ops`, `last_error`.
+- **DKMS** — `aimos-scheduler-dkms` PKGBUILD + `dkms.conf`. Module auto-rebuilds on kernel updates.
+- **PostgreSQL Metrics** — four tables: `metrics_cpu`, `metrics_memory`, `metrics_network`, `scheduler_events`. Polled every 1 s (configurable via `AIMOS_INTERVAL`). Disable with `AIMOS_NO_DB=1`.
 
 ---
 
@@ -54,134 +54,118 @@
 
 ```
 AI_M_OS/
-├── ai-daemon/                  # Python AI daemon
-│   ├── daemon.py               # Main loop, metrics collection
+├── ai-daemon/
+│   ├── daemon.py                   # Main loop
+│   ├── collectors/metrics.py       # /proc/stat, /proc/meminfo, Go sockets
 │   ├── scheduler/
-│   │   ├── kernel_iface.py     # /proc/aimos_scheduler interface ✅
-│   │   └── heuristics.py       # CPU/RAM/load heuristics ✅
-│   ├── collectors/             # Metrics collectors
-│   ├── dbus/                   # D-Bus service ✅
-│   │   ├── scheduler_service.py    # org.aimos.Scheduler daemon
-│   │   └── aimos_scheduler_app.py  # GTK4 process manager
-│   ├── db/                     # PostgreSQL event logger ✅
-│   └── proto/                  # Protobuf client (planned)
-├── csharp-apps/
-│   └── SystemMonitor/          # C# GTK4 System Monitor ✅
-│       └── Widgets/
-│           ├── CpuWidget.cs
-│           ├── RamWidget.cs
-│           ├── DiskWidget.cs
-│           ├── NetworkWidget.cs
-│           └── SchedulerWidget.cs  # reads /proc/aimos_scheduler ✅
-├── gnome-extension/            # GNOME Shell extension ✅
-│   ├── extension.js            # top bar indicator, D-Bus client
-│   ├── metadata.json
-│   └── stylesheet.css
-├── go-daemons/
-│   └── cmd/
-│       ├── power-daemon/       # Power management ✅
-│       ├── network-daemon/     # Network monitoring ✅
-│       └── sensor-daemon/      # Temperature and fans ✅
-├── kernel-modules/
-│   └── aimos_scheduler/        # Kernel module C + DKMS ✅
-├── dbus-policy/                # D-Bus security policy ✅
-├── iso-profile/                # archiso build profile ✅
-├── desktop/                    # .desktop files and metadata ✅
-└── systemd/                    # systemd service units ✅
+│   │   ├── kernel_iface.py         # /proc/aimos_scheduler read/write + fallback
+│   │   └── heuristics.py           # 4 rules: high_cpu, high_mem, high_load, low_cpu_restore
+│   ├── dbus/
+│   │   ├── scheduler_service.py    # org.aimos.Scheduler service (system bus)
+│   │   └── aimos_scheduler_app.py  # GTK4 process manager (Adw.ApplicationWindow)
+│   ├── db/
+│   │   ├── logger.py               # psycopg2, log_snapshot(), log_scheduler_event()
+│   │   └── schema.sql              # PostgreSQL 15+ schema
+│   └── proto/client.py             # Unix socket client for Go daemons
+├── csharp-apps/SystemMonitor/
+│   ├── Widgets/{Cpu,Ram,Disk,Network,Scheduler}Widget.cs
+│   └── Services/SystemMetrics.cs   # /proc/stat, /proc/meminfo, /proc/net/dev, /proc/diskstats
+├── gnome-extension/
+│   ├── extension.js                # PanelMenu.Button, DBusProxy, 3-second poll
+│   └── metadata.json               # uuid: aimos-scheduler@aimos.ai-m-os, shell 46–50
+├── go-daemons/cmd/
+│   ├── power-daemon/               # /sys/devices/system/cpu, /proc/meminfo, /proc/uptime
+│   ├── network-daemon/             # /proc/net/dev with snapshot diffing
+│   └── sensor-daemon/              # /sys/class/hwmon, /proc/loadavg, /proc/diskstats
+├── kernel-modules/aimos_scheduler/
+│   ├── aimos_scheduler.c           # proc_ops, set_user_nice(), MODULE_LICENSE("GPL")
+│   ├── dkms.conf                   # PACKAGE_VERSION=0.5.0, AUTOINSTALL=yes
+│   └── PKGBUILD                    # aimos-scheduler-dkms
+├── dbus-policy/org.aimos.Scheduler.conf
+├── iso-profile/                    # archiso profile, zstd level 1
+│   ├── packages.x86_64
+│   ├── profiledef.sh
+│   └── airootfs/
+│       ├── etc/systemd/system/     # aimos-ai-daemon, network/power/sensor daemons
+│       ├── etc/modules-load.d/aimos_scheduler.conf
+│       └── opt/aimos/ai-daemon/    # deployed daemon copy
+└── systemd/aimos-scheduler-dbus.service
 ```
 
 ---
 
-## How the full stack connects
+## Stack connection
 
 ```
-GNOME Shell extension
-        │  D-Bus signal: PriorityChanged
-        │  D-Bus call:   IsKernelModuleLoaded
+GNOME Shell extension (extension.js)
+        │  D-Bus: IsKernelModuleLoaded(), PriorityChanged signal
         ▼
-org.aimos.Scheduler  (scheduler_service.py)
-        │
-        │  renice_via_kernel(pid, nice)
-        ▼
-kernel_iface.py
-        │
-        │  write: "pid nice\n"     read: "status: active\n..."
-        ▼
-/proc/aimos_scheduler
+scheduler_service.py  →  org.aimos.Scheduler (system bus)
         │
         ▼
-aimos_scheduler.ko  →  set_user_nice()  [kernel]
+kernel_iface.py  →  write "pid nice\n" to /proc/aimos_scheduler
+        │                        OR  os.setpriority() fallback
+        ▼
+aimos_scheduler.ko  →  set_user_nice(task, nice_val)
 ```
-
-If `aimos_scheduler.ko` is not loaded, `kernel_iface.py` falls back to `os.setpriority()` transparently.
 
 ---
-
 
 ## Build Requirements
 
-- Arch Linux (WSL2 or native)
-- `archiso`, `base-devel`, `linux-headers`
-- `go` 1.21+
-- `python3`, `python-dbus`, `pip`
-- `dotnet-sdk` 10.0+
-- 10 GB free disk space
+| Tool | Version |
+|---|---|
+| Arch Linux (build host) | rolling |
+| `archiso` | latest |
+| `go` | 1.21+ (module: `aimos/daemons`, go 1.26.2) |
+| `python3` | 3.11+ |
+| `python-dbus`, `psycopg2-binary` | latest |
+| `dotnet-sdk` | 10.0 (TargetFramework: net10.0) |
+| Disk space for ISO build | 10 GB+ at `/root/aimos-work` |
 
 ---
 
 ## Quick Start
 
 ```bash
-# Clone
 git clone https://github.com/Mentolka1207/AI_M_OS.git
 cd AI_M_OS
 
-# Build Go daemons
+# Go daemons
 cd go-daemons && go build ./cmd/... && cd ..
 
-# Install Python AI daemon
+# Python daemon dependencies
 cd ai-daemon && pip install -r requirements.txt && cd ..
+# requirements.txt: psycopg2-binary>=2.9
 
-# Build and load kernel module (via DKMS)
+# Kernel module via DKMS
 sudo cp -r kernel-modules/aimos_scheduler /usr/src/aimos_scheduler-0.5.0
 sudo dkms add aimos_scheduler/0.5.0
 sudo dkms build aimos_scheduler/0.5.0
 sudo dkms install aimos_scheduler/0.5.0
-cat /proc/aimos_scheduler   # verify: status: active
+cat /proc/aimos_scheduler
+# Expected: "AI_M_OS Scheduler active. Write: <pid> <nice_value>"
 
-# Install D-Bus policy and service
+# D-Bus service
 sudo cp dbus-policy/org.aimos.Scheduler.conf /etc/dbus-1/system.d/
 sudo cp systemd/aimos-scheduler-dbus.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now aimos-scheduler-dbus
 
-# Install GNOME Shell extension
-EXT=~/.local/share/gnome-shell/extensions/aimos-scheduler@aimos.ai-m-os
-mkdir -p $EXT
-cp gnome-extension/* $EXT/
+# GNOME Shell extension
+EXT_DIR=~/.local/share/gnome-shell/extensions/aimos-scheduler@aimos.ai-m-os
+mkdir -p "$EXT_DIR" && cp gnome-extension/* "$EXT_DIR"/
 gnome-extensions enable aimos-scheduler@aimos.ai-m-os
 
-# Run AI daemon (with PostgreSQL)
-cd ai-daemon
-AIMOS_DB_DSN="postgresql://aimos:aimos@localhost/aimos_metrics" sudo -E python3 daemon.py
+# AI daemon — with PostgreSQL
+AIMOS_DB_DSN="postgresql://aimos:aimos@localhost/aimos_metrics" sudo -E python3 ai-daemon/daemon.py
 
-# Run AI daemon (no DB mode)
-AIMOS_NO_DB=1 sudo -E python3 daemon.py
+# AI daemon — no DB
+AIMOS_NO_DB=1 sudo -E python3 ai-daemon/daemon.py
 
-# Build ISO (optional)
-sudo mkarchiso -v -w /tmp/aimos-work -o ./out iso-profile/
+# Build ISO
+sudo mkarchiso -v -w /root/aimos-work -o ./out iso-profile/
 ```
-
----
-
-## Kernel module autoload
-
-```
-/etc/modules-load.d/aimos_scheduler.conf
-/lib/modules/$(uname -r)/extra/aimos_scheduler.ko
-```
-
-Verify with `modinfo aimos_scheduler` and `cat /proc/aimos_scheduler` after reboot.
 
 ---
 
@@ -189,14 +173,15 @@ Verify with `modinfo aimos_scheduler` and `cat /proc/aimos_scheduler` after rebo
 
 | Component | Technology |
 |---|---|
-| Kernel interface | C (kernel module) |
-| System daemons | Go |
-| AI daemon + scheduler | Python |
-| D-Bus service | Python (`python-dbus`) |
-| GUI apps | C# (.NET + GTK4) |
-| GNOME Shell extension | JavaScript (ESM) |
-| Database | PostgreSQL |
-| Filesystem | AIFS (btrfs-based, planned) |
+| Kernel module | C, GPL, `set_user_nice()` |
+| System daemons | Go (`aimos/daemons`) |
+| AI daemon | Python 3, psycopg2 |
+| D-Bus service | Python, `python-dbus` |
+| GUI | C# .NET 10, GTK4 via GirCore 0.5.0 |
+| GNOME extension | JavaScript ESM, shell 46–50 |
+| Database | PostgreSQL 15+ |
+| IPC | Unix sockets `/run/aimos/*.sock` |
+| ISO compression | squashfs, zstd level 1 |
 
 ---
 
@@ -207,7 +192,6 @@ Verify with `modinfo aimos_scheduler` and `cat /proc/aimos_scheduler` after rebo
 | RAM | 4 GB | 8 GB |
 | Disk | 30 GB | 50 GB |
 | CPU | x86_64 | x86_64 multi-core |
-| GPU | — | NVIDIA / AMD |
 
 ---
 
@@ -215,12 +199,12 @@ Verify with `modinfo aimos_scheduler` and `cat /proc/aimos_scheduler` after rebo
 
 | Version | Status | Description |
 |---|---|---|
-| Alpha 0.1.0 | ✅ Done | Base ISO, GNOME 50, Go daemons |
-| Alpha 0.2.0 | ✅ Done | Glassmorphism UI, Python AI daemon |
-| Alpha 0.3.0 | ✅ Done | Scheduler heuristics, `aimos_scheduler` kernel module, `/proc` interface |
-| Beta 0.5.0 | ✅ Done | C# System Monitor, D-Bus service, GNOME Shell extension |
-| RC 0.9.0 | 🔄 In Progress | PostgreSQL logger ✅, DKMS packaging ✅, real hardware support, ARM64 |
-| Release 1.0 | ⏳ Planned | Stable release, AIFS filesystem, full documentation |
+| Alpha 0.1.0 | ✅ | Base ISO, GNOME 50, Go daemons |
+| Alpha 0.2.0 | ✅ | Glassmorphism UI, Python AI daemon |
+| Alpha 0.3.0 | ✅ | `aimos_scheduler` kernel module, heuristics, `/proc` interface |
+| Beta 0.5.0 | ✅ | C# System Monitor, D-Bus, GNOME extension |
+| RC 0.9.0 | 🔄 | PostgreSQL ✅, DKMS ✅, real hardware, ARM64 |
+| Release 1.0 | ⏳ | Stable release, AIFS filesystem, full docs |
 
 ---
 
@@ -233,4 +217,4 @@ Verify with `modinfo aimos_scheduler` and `cat /proc/aimos_scheduler` after rebo
 
 ## License
 
-MIT License — see [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE)
