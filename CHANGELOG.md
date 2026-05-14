@@ -2,9 +2,12 @@
 
 All notable changes to AI_M_OS are documented here.
 
-## [Unreleased] - RC 0.9.0 progress - 2026-05-04
+## [Unreleased] - RC 0.9.0 progress - 2026-05-14
 
 ### Added
+- AIFS filesystem daemon (Go) - btrfs subvolume/snapshot manager via Unix socket
+- AIFS CLI tool (`aifs`) - create, delete, list, snap, snaps, restore, rmsnap
+- `aimos-aifs.service` systemd unit
 - DKMS packaging for 'aimos_scheduler' - module auto-rebuilds on kernel update
 - 'PKGBULD' for 'aimos-scheduler-dkms' Arch package
 - PostgreSQL event logger completed - all 4 heuristic rules ('high_cpu', 'high_load', 'low_cpu_restore') write to 'scheduler_events' table
@@ -35,6 +38,9 @@ All notable changes to AI_M_OS are documented here.
 ## [RC 0.9.0] - 2026-04-24
 
 ### Added
+- AIFS filesystem daemon (Go) - btrfs subvolume/snapshot manager via Unix socket
+- AIFS CLI tool (`aifs`) - create, delete, list, snap, snaps, restore, rmsnap
+- `aimos-aifs.service` systemd unit
 - Real hardware support (x86_64)
 - AI scheduler kernel module (`aimos_scheduler.ko`) via DKMS
 - D-Bus scheduler service with GNOME Shell integration
@@ -52,6 +58,9 @@ All notable changes to AI_M_OS are documented here.
 ## [Alpha 0.3.0] - 2026-04-27
 
 ### Added
+- AIFS filesystem daemon (Go) - btrfs subvolume/snapshot manager via Unix socket
+- AIFS CLI tool (`aifs`) - create, delete, list, snap, snaps, restore, rmsnap
+- `aimos-aifs.service` systemd unit
 - 'aimos_scheduler.c' - kernel module exposing '/proc/aimos_scheduler' (read/write)
 - 'aimos_scheduler.ko' built and tested on kernel 6.19.14-arch1-1
 - Kernel module autoload via '/etc/modules-load.d/aimos_scheduler.conf'
@@ -82,6 +91,9 @@ All notable changes to AI_M_OS are documented here.
 ## [Alpha 0.1.0] - 2026-04-11
 
 ### Added
+- AIFS filesystem daemon (Go) - btrfs subvolume/snapshot manager via Unix socket
+- AIFS CLI tool (`aifs`) - create, delete, list, snap, snaps, restore, rmsnap
+- `aimos-aifs.service` systemd unit
 - Initial release
 - Base Arch Linux ISO via archiso
 - GNOME 50 desktop environment
