@@ -117,7 +117,7 @@ aimos_scheduler.ko  →  set_user_nice(task, nice_val)
 | Arch Linux (build host) | rolling |
 | `archiso` | latest |
 | `go` | 1.21+ (module: `aimos/daemons`, go 1.26.2) |
-| `python3` | 3.11+ |
+| `python3` | 3.12+ |
 | `python-dbus`, `psycopg2-binary` | latest |
 | `dotnet-sdk` | 10.0 (TargetFramework: net10.0) |
 | Disk space for ISO build | 10 GB+ at `/root/aimos-work` |
@@ -177,7 +177,7 @@ sudo mkarchiso -v -w /root/aimos-work -o ./out iso-profile/
 | AI daemon | Python 3, psycopg2 |
 | D-Bus service | Python, `python-dbus` |
 | GUI | C# .NET 10, GTK4 via GirCore 0.5.0 |
-| GNOME extension | JavaScript ESM, shell 46–50 |
+| GNOME extension | JavaScript ESM, shell 48–50 |
 | Database | PostgreSQL 15+ |
 | IPC | Unix sockets `/run/aimos/*.sock` |
 | ISO compression | squashfs, zstd level 1 |
