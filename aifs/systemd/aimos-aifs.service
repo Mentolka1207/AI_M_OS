@@ -1,0 +1,14 @@
+[Unit]
+Description=AI_M_OS AIFS Daemon (btrfs subvolume/snapshot manager)
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/aifs-daemon
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
