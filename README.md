@@ -163,7 +163,7 @@ AIMOS_DB_DSN="postgresql://aimos:aimos@localhost/aimos_metrics" sudo -E python3 
 AIMOS_NO_DB=1 sudo -E python3 ai-daemon/daemon.py
 
 # Build ISO
-sudo mkarchiso -v -w /root/aimos-work -o ./out iso-profile/
+sudo mkarchiso -v -m iso -w /root/aimos-work -o ./out iso-profile/
 ```
 
 ---

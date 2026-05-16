@@ -235,10 +235,10 @@ mv AI_M_OS.partab AI_M_OS.part2
 sha256sum AI_M_OS-*.iso > AI_M_OS.iso.sha256
 ```
 
-Upload `part1`, `part2`, and `.sha256` to the GitHub release. The ISO SHA256 from RC 0.9.0 (2026-04-26):
+Upload `part1`, `part2`, and `.sha256` to the GitHub release. The ISO SHA256 from Release 1.0.0 (2026-05-16):
 
 ```
-ab48b36ea6664644c114b477a73c49108b626e1ff00317d71daa795b88181a51
+6666792162ddf020e8676b41b810d99aebf59ddc1f485fdc0ebcf54d9e52e6331
 ```
 
 ### Publish via gh CLI
