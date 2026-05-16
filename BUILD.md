@@ -73,7 +73,7 @@ sudo rm -rf /root/aimos-work/*
 ### Step 2 — Run mkarchiso
 
 ```bash
-sudo mkarchiso -v \
+sudo mkarchiso -v -m iso \
   -w /root/aimos-work \
   -o ./out \
   iso-profile/
