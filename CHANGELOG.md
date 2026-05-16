@@ -2,6 +2,25 @@
 
 All notable changes to AI_M_OS are documented here.
 
+## [Release 1.0.0] - 2026-05-16
+
+### Added
+- AIFS filesystem daemon (Go) - btrfs subvolume/snapshot manager
+- AMD GPU support packages (vulkan-radeon, libva-mesa-driver, xf86-video-amdgpu, radeontop)
+- Full documentation (INSTALL.md, BUILD.md, AI_DAEMON.md)
+
+### Changed
+- Version bumped to 1.0.0
+- ISO label: AIMOS_1_0
+- motd updated to Release 1.0.0
+
+### Checksums
+| File | SHA256 |
+|---|---|
+| AI_M_OS-1.0.0-x86_64.iso | `6666792162ddf020e8676b41b810d99aebf59ddc1f485fdc0ebcf54d9e52e6331` |
+
+---
+
 ## [Unreleased] - RC 0.9.0 progress - 2026-05-14
 
 ### Added
