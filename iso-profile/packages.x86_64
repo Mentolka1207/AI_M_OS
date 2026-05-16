@@ -168,6 +168,5 @@ libnewt
 # AMD GPU support
 vulkan-radeon
 libva-mesa-driver
-mesa-vdpau
 xf86-video-amdgpu
 radeontop
