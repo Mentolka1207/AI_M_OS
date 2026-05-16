@@ -31,7 +31,7 @@
 | PostgreSQL event logger | ✅ Done |
 | DKMS packaging (`aimos-scheduler-dkms`) | ✅ Done |
 | AIFS filesystem (btrfs-based, CoW) | ✅ Done |
-| Real hardware testing | ⏳ Planned |
+| Real hardware testing | ✅ Done |
 | Stable Release 1.0 | ✅ Done |
 
 ---
