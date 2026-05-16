@@ -2,10 +2,10 @@
 # shellcheck disable=SC2034
 
 iso_name="AI_M_OS"
-iso_label="AIMOS_BETA"
+iso_label="AIMOS_1_0"
 iso_publisher="AI_M_OS Project"
-iso_application="AI_M_OS Beta 0.5.0"
-iso_version="RC-0.9.0"
+iso_application="AI_M_OS Release 1.0.0"
+iso_version="1.0.0"
 install_dir="arch"
 buildmodes=('iso')
 bootmodes=('bios.syslinux'

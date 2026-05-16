@@ -2,7 +2,7 @@
 
 **AI_M_OS** is a custom operating system based on Arch Linux with AI integrated at the kernel level.
 
-![version](https://img.shields.io/badge/version-RC%200.9.0-blue)
+![version](https://img.shields.io/badge/version-1.0.0-brightgreen)
 ![base](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
 ![DE](https://img.shields.io/badge/DE-GNOME%2050-4a86cf)
 ![kernel](https://img.shields.io/badge/kernel-6.19.14--arch1-orange)
@@ -32,7 +32,7 @@
 | DKMS packaging (`aimos-scheduler-dkms`) | ✅ Done |
 | AIFS filesystem (btrfs-based, CoW) | ✅ Done |
 | Real hardware testing | ⏳ Planned |
-| Stable Release 1.0 | ⏳ Planned |
+| Stable Release 1.0 | ✅ Done |
 
 ---
 
@@ -202,8 +202,8 @@ sudo mkarchiso -v -w /root/aimos-work -o ./out iso-profile/
 | Alpha 0.2.0 | ✅ | Glassmorphism UI, Python AI daemon |
 | Alpha 0.3.0 | ✅ | `aimos_scheduler` kernel module, heuristics, `/proc` interface |
 | Beta 0.5.0 | ✅ | C# System Monitor, D-Bus, GNOME extension |
-| RC 0.9.0 | 🔄 | PostgreSQL ✅, DKMS ✅, AIFS ✅, real hardware |
-| Release 1.0 | ⏳ | Stable release, full docs, real hardware testing |
+| RC 0.9.0 | ✅ | PostgreSQL ✅, DKMS ✅, AIFS ✅, real hardware ✅ |
+| Release 1.0 | ✅ | Stable release |
 
 ---
 
