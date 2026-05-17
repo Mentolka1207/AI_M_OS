@@ -71,7 +71,7 @@ AI_M_OS/
 │   └── Services/SystemMetrics.cs   # /proc/stat, /proc/meminfo, /proc/net/dev, /proc/diskstats
 ├── gnome-extension/
 │   ├── extension.js                # PanelMenu.Button, DBusProxy, 3-second poll
-│   └── metadata.json               # uuid: aimos-scheduler@aimos.ai-m-os, shell 46–50
+│   └── metadata.json               # uuid: aimos-scheduler@aimos.ai-m-os, shell 48–50
 ├── go-daemons/cmd/
 │   ├── power-daemon/               # /sys/devices/system/cpu, /proc/meminfo, /proc/uptime
 │   ├── network-daemon/             # /proc/net/dev with snapshot diffing
