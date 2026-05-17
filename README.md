@@ -2,7 +2,7 @@
 
 **AI_M_OS** is a custom operating system based on Arch Linux with AI integrated at the kernel level.
 
-![version](https://img.shields.io/badge/version-1.0.0-brightgreen)
+![version](https://img.shields.io/badge/version-1.0.1-brightgreen)
 ![base](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
 ![DE](https://img.shields.io/badge/DE-GNOME%2050-4a86cf)
 ![kernel](https://img.shields.io/badge/kernel-6.19.14--arch1-orange)
