@@ -131,8 +131,6 @@ func collectState() PowerState {
 	}
 }
 
-	os.WriteFile("/run/aimos/power-state.json", data, 0644)
-}
 
 
 func handleConn(conn net.Conn) {
