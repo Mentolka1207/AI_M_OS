@@ -120,7 +120,7 @@ aimos_scheduler.ko  →  set_user_nice(task, nice_val)
 | `python3` | 3.12+ |
 | `python-dbus`, `psycopg2-binary` | latest |
 | `dotnet-sdk` | 10.0 (TargetFramework: net10.0) |
-| Disk space for ISO build | 10 GB+ at `/root/aimos-work` |
+| Disk space for ISO build | 10 GB+ at `/var/tmp/aimos-build` |
 
 ---
 
@@ -163,7 +163,7 @@ AIMOS_DB_DSN="postgresql://aimos:aimos@localhost/aimos_metrics" sudo -E python3 
 AIMOS_NO_DB=1 sudo -E python3 ai-daemon/daemon.py
 
 # Build ISO
-sudo mkarchiso -v -m iso -w /root/aimos-work -o ./out iso-profile/
+sudo mkarchiso -v -m iso -w /var/tmp/aimos-build -o ./out iso-profile/
 ```
 
 ---

@@ -244,14 +244,14 @@ Upload `part1`, `part2`, and `.sha256` to the GitHub release. The ISO SHA256 fro
 ### Publish via gh CLI
 
 ```bash
-git tag -a v0.9.0 -m "RC 0.9.0"
-git push origin v0.9.0
+git tag -a v1.0.1 -m "Release 1.0.1"
+git push origin v1.0.1
 
-gh release create v0.9.0 \
+gh release create v1.0.1 \
   AI_M_OS.part1 \
   AI_M_OS.part2 \
   AI_M_OS.iso.sha256 \
-  --title "AI_M_OS RC 0.9.0" \
+  --title "AI_M_OS Release 1.0.1" \
   --notes-file CHANGELOG.md
 ```
 

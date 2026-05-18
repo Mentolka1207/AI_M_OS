@@ -2,6 +2,20 @@
 
 All notable changes to AI_M_OS are documented here.
 
+## [Release 1.0.1] - 2026-05-18
+
+### Added
+- Brave Browser (brave-bin via custom local repository)
+- LibreOffice Fresh (libreoffice-fresh, libreoffice-fresh-ru)
+- NetworkManager autostart in live ISO (systemd symlink)
+- Parental Controls hidden (org.freedesktop.MalcontentControl.desktop -> Hidden=true)
+
+### Changed
+- iso_version bumped to 1.0.1 in profiledef.sh
+
+---
+
+
 ## [Release 1.0.0] - 2026-05-16
 
 ### Added
@@ -111,13 +125,3 @@ All notable changes to AI_M_OS are documented here.
 - Python AI daemon (base)
 - AIFS filesystem (btrfs-based)
 
-## [Release 1.0.1] - 2026-05-18
-
-### Added
-- Brave Browser (brave-bin via custom local repository)
-- LibreOffice Fresh (libreoffice-fresh, libreoffice-fresh-ru)
-- NetworkManager autostart in live ISO (systemd symlink)
-- Parental Controls hidden (org.freedesktop.MalcontentControl.desktop -> Hidden=true)
-
-### Changed
-- iso_version bumped to 1.0.1 in profiledef.sh
