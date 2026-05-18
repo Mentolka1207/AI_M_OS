@@ -95,7 +95,7 @@ Recommended settings:
 
 | Setting | Value |
 |---|---|
-| Disk | your target disk, `ext4` |
+| Disk | your target disk, `Btrfs` |
 | Bootloader | `grub` |
 | Profile | `gnome` |
 | Audio | `pipewire` |
