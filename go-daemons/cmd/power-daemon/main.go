@@ -17,7 +17,6 @@ import (
 
 const (
 	VERSION    = "0.1.0"
-	SOCKET_PATH = "/run/aimos/power.sock"
 	SOCKET_UNIX = "/run/aimos/power-daemon.sock"
 )
 
@@ -132,12 +131,6 @@ func collectState() PowerState {
 	}
 }
 
-func writeState(state PowerState) {
-	os.MkdirAll("/run/aimos", 0755)
-	data, err := json.Marshal(state)
-	if err != nil {
-		return
-	}
 	os.WriteFile("/run/aimos/power-state.json", data, 0644)
 }
 
@@ -186,7 +179,6 @@ func main() {
 		select {
 		case <-ticker.C:
 			state := collectState()
-			writeState(state)
 			log.Printf("cpu=%s %dMHz mem=%d/%dMB (%.1f%%) uptime=%ds",
 				state.CPUGovernor, state.CPUFreqMHz,
 				state.MemUsedMB, state.MemTotalMB,

@@ -7,7 +7,7 @@ license=('MIT')
 depends=('dkms' 'linux-headers')
 _srcname=aimos_scheduler
 
-source=("${_srcname}.c" "${_srcname}.mod.c" "Makefile" "dkms.conf")
+source=("${_srcname}.c" "Makefile" "dkms.conf")
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {

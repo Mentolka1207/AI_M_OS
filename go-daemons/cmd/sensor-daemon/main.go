@@ -144,9 +144,6 @@ func main() {
 		select {
 		case <-ticker.C:
 			state := collectState()
-			os.MkdirAll("/run/aimos", 0755)
-			data, _ := json.Marshal(state)
-			os.WriteFile("/run/aimos/sensor-state.json", data, 0644)
 			log.Printf("temp=%.1f°C load=%.2f/%.2f/%.2f",
 				state.CPUTempC, state.LoadAvg1, state.LoadAvg5, state.LoadAvg15)
 		case <-sig:
