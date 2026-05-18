@@ -21,7 +21,7 @@
 | Build host OS | **Arch Linux** (native or VM) |
 | Tested on | Arch Linux in VMware Workstation on Windows 11 Pro |
 | WSL2 | Ubuntu WSL2 can be used for Go/C# compilation, but ISO build requires native Arch |
-| ISO work directory | `/root/aimos-work` — **required**, see below |
+| ISO work directory | `/var/tmp/aimos-build` — **required**, see below |
 
 > `archiso` must run on Arch Linux. Building on Ubuntu or Debian is not supported.
 
@@ -56,25 +56,25 @@ The build profile is in `iso-profile/`. Key settings from `profiledef.sh`:
 |---|---|
 | `iso_name` | `AI_M_OS` |
 | `iso_label` | `AIMOS_BETA` |
-| `iso_version` | `RC-0.9.0` |
+| `iso_version` | `1.0.1` |
 | `airootfs_image_type` | `squashfs` |
 | Compression | `zstd` level `1` (fast decompress, ~2.9 GB output) |
 | Boot modes | `bios.syslinux` + `uefi.systemd-boot` |
 
 ### Step 1 — Prepare the work directory
 
-The work directory **must be** `/root/aimos-work`. Using `/tmp` causes tmpfs exhaustion because `/tmp` is a tmpfs and the squashfs build requires several GB of scratch space.
+The work directory **must be** `/var/tmp/aimos-build`. Using `/tmp` causes tmpfs exhaustion because `/tmp` is a tmpfs and the squashfs build requires several GB of scratch space.
 
 ```bash
-sudo mkdir -p /root/aimos-work
-sudo rm -rf /root/aimos-work/*
+sudo mkdir -p /var/tmp/aimos-build
+sudo rm -rf /var/tmp/aimos-build/*
 ```
 
 ### Step 2 — Run mkarchiso
 
 ```bash
 sudo mkarchiso -v -m iso \
-  -w /root/aimos-work \
+  -w /var/tmp/aimos-build \
   -o ./out \
   iso-profile/
 ```
@@ -265,10 +265,10 @@ gh release create v0.9.0 \
 
 **Cause:** work directory is on tmpfs (e.g. `/tmp`).
 
-**Fix:** always use `/root/aimos-work`:
+**Fix:** always use `/var/tmp/aimos-build`:
 ```bash
 df -h /root   # verify ≥10 GB free
-sudo rm -rf /root/aimos-work && sudo mkdir /root/aimos-work
+sudo rm -rf /var/tmp/aimos-build && sudo mkdir /var/tmp/aimos-build
 ```
 
 ### Package not found during ISO build
