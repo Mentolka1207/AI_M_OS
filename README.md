@@ -210,6 +210,12 @@ sudo mkarchiso -v -m iso -w /var/tmp/aimos-build -o ./out iso-profile/
 
 ## Download
 
+**One-command download (Linux/macOS):**
+```bash
+curl -LO https://raw.githubusercontent.com/Mentolka1207/AI_M_OS/master/download.sh
+bash download.sh
+```
+
 - **GitHub Releases:** [github.com/Mentolka1207/AI_M_OS/releases](https://github.com/Mentolka1207/AI_M_OS/releases)
 - **SourceForge:** [sourceforge.net/projects/ai-m-os](https://sourceforge.net/projects/ai-m-os/files/)
 
