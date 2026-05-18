@@ -217,7 +217,7 @@ bash download.sh
 ```
 
 - **GitHub Releases:** [github.com/Mentolka1207/AI_M_OS/releases](https://github.com/Mentolka1207/AI_M_OS/releases)
-- **SourceForge:** [sourceforge.net/projects/ai-m-os](https://sourceforge.net/projects/ai-m-os/files/)
+- **SourceForge:** https://sourceforge.net/projects/aimos/files/v1.0.1/AI_M_OS-1.0.1-x86_64.iso/download
 
 ---
 
