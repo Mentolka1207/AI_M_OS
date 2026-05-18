@@ -204,6 +204,7 @@ sudo mkarchiso -v -m iso -w /var/tmp/aimos-build -o ./out iso-profile/
 | Beta 0.5.0 | ✅ | C# System Monitor, D-Bus, GNOME extension |
 | RC 0.9.0 | ✅ | PostgreSQL ✅, DKMS ✅, AIFS ✅, real hardware ✅ |
 | Release 1.0 | ✅ | Stable release |
+| Release 1.0.1 | ✅ | Brave Browser, LibreOffice, NetworkManager live, Parental Controls hidden |
 
 ---
 
