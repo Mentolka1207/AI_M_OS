@@ -5,7 +5,7 @@
 ![version](https://img.shields.io/badge/version-1.0.1-brightgreen)
 ![base](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
 ![DE](https://img.shields.io/badge/DE-GNOME%2050-4a86cf)
-![kernel](https://img.shields.io/badge/kernel-6.19.14--arch1-orange)
+![kernel](https://img.shields.io/badge/kernel-7.0.11--arch1-orange)
 ![license](https://img.shields.io/badge/license-MIT-green)
 [![Download AI_M_OS](https://img.shields.io/sourceforge/dm/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
 [![Download AI_M_OS](https://img.shields.io/sourceforge/dt/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
@@ -71,7 +71,7 @@ AI_M_OS/
 │   └── Services/SystemMetrics.cs   # /proc/stat, /proc/meminfo, /proc/net/dev, /proc/diskstats
 ├── gnome-extension/
 │   ├── extension.js                # PanelMenu.Button, DBusProxy, 3-second poll
-│   └── metadata.json               # uuid: aimos-scheduler@aimos.ai-m-os, shell 48–50
+│   └── metadata.json               # uuid: aimos-scheduler@aimos.ai-m-os, shell 50
 ├── go-daemons/cmd/
 │   ├── power-daemon/               # /sys/devices/system/cpu, /proc/meminfo, /proc/uptime
 │   ├── network-daemon/             # /proc/net/dev with snapshot diffing
@@ -116,8 +116,8 @@ aimos_scheduler.ko  →  set_user_nice(task, nice_val)
 |---|---|
 | Arch Linux (build host) | rolling |
 | `archiso` | latest |
-| `go` | 1.21+ (module: `aimos/daemons`, go 1.26.2) |
-| `python3` | 3.12+ |
+| `go` | 1.21+ (module: `aimos/daemons`, go 1.26.4.1) |
+| `python3` | 3.14+ |
 | `python-dbus`, `psycopg2-binary` | latest |
 | `dotnet-sdk` | 10.0 (TargetFramework: net10.0) |
 | Disk space for ISO build | 10 GB+ at `/var/tmp/aimos-build` |
@@ -177,7 +177,7 @@ sudo mkarchiso -v -m iso -w /var/tmp/aimos-build -o ./out iso-profile/
 | AI daemon | Python 3, psycopg2 |
 | D-Bus service | Python, `python-dbus` |
 | GUI | C# .NET 10, GTK4 via GirCore 0.5.0 |
-| GNOME extension | JavaScript ESM, shell 48–50 |
+| GNOME extension | JavaScript ESM, shell 50 |
 | Database | PostgreSQL 15+ |
 | IPC | Unix sockets `/run/aimos/*.sock` |
 | ISO compression | squashfs, zstd level 1 |
@@ -189,7 +189,7 @@ sudo mkarchiso -v -m iso -w /var/tmp/aimos-build -o ./out iso-profile/
 | | Minimum | Recommended |
 |---|---|---|
 | RAM | 4 GB | 8 GB |
-| Disk | 30 GB | 50 GB |
+| Disk | 30 GB | 60 GB |
 | CPU | x86_64 | x86_64 multi-core |
 
 ---
