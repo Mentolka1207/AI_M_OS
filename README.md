@@ -1,6 +1,7 @@
 # AI_M_OS
 
 **AI_M_OS** is a custom operating system based on Arch Linux with AI integrated at the kernel level.
+The system will no longer be updated. There will only be updates to the latest versions of the Linux kernel, programming languages, and databases. So, you can safely use this system as the basis for your almost pure Arch distribution.
 
 ![version](https://img.shields.io/badge/version-1.0.1-brightgreen)
 ![base](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
