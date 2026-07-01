@@ -5,7 +5,7 @@
 ![version](https://img.shields.io/badge/version-1.0.1-brightgreen)
 ![base](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
 ![DE](https://img.shields.io/badge/DE-GNOME%2050-4a86cf)
-![kernel](https://img.shields.io/badge/kernel-7.0.12--arch1-orange)
+![kernel](https://img.shields.io/badge/kernel-7.0.13--arch1-orange)
 ![license](https://img.shields.io/badge/license-MIT-green)
 [![Download AI_M_OS](https://img.shields.io/sourceforge/dm/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
 [![Download AI_M_OS](https://img.shields.io/sourceforge/dt/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
@@ -178,7 +178,7 @@ sudo mkarchiso -v -m iso -w /var/tmp/aimos-build -o ./out iso-profile/
 | D-Bus service | Python, `python-dbus` |
 | GUI | C# .NET 10, GTK4 via GirCore 0.5.0 |
 | GNOME extension | JavaScript ESM, shell 50 |
-| Database | PostgreSQL 15+ |
+| Database | PostgreSQL 18+ |
 | IPC | Unix sockets `/run/aimos/*.sock` |
 | ISO compression | squashfs, zstd level 1 |
 
