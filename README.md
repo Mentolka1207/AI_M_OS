@@ -5,7 +5,7 @@
 ![version](https://img.shields.io/badge/version-1.0.1-brightgreen)
 ![base](https://img.shields.io/badge/base-Arch%20Linux-1793d1)
 ![DE](https://img.shields.io/badge/DE-GNOME%2050-4a86cf)
-![kernel](https://img.shields.io/badge/kernel-7.0.13--arch1-orange)
+![kernel](https://img.shields.io/badge/kernel-7.0.14--arch1-orange)
 ![license](https://img.shields.io/badge/license-MIT-green)
 [![Download AI_M_OS](https://img.shields.io/sourceforge/dm/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
 [![Download AI_M_OS](https://img.shields.io/sourceforge/dt/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
