@@ -8,7 +8,7 @@
 ![kernel](https://img.shields.io/badge/kernel-7.0.14--arch1-orange)
 ![license](https://img.shields.io/badge/license-MIT-green)
 [![Download AI_M_OS](https://img.shields.io/sourceforge/dm/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
-[![Download AI_M_OS](https://img.shields.io/sourceforge/dt/ai-m-os.svg)](https://sourceforge.net/projects/ai-m-os/files/)
+[![Download AI_M_OS](https://sourceforge.net/projects/aimos/files/v1.0.1/AI_M_OS-1.0.1-x86_64.iso/download)
 
 [![Download AI_M_OS](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/ai-m-os/files/)
 
